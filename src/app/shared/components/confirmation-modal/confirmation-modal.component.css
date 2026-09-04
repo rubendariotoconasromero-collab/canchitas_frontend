@@ -1,0 +1,33 @@
+.cm-body {
+  text-align: center;
+}
+
+.cm-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 0.75rem;
+  border-radius: 50%;
+  background: var(--alert-warning-bg-color);
+  color: var(--alert-warning-color);
+}
+
+.cm-icon.cm-danger {
+  background: var(--alert-error-bg-color);
+  color: var(--alert-error-color);
+}
+
+.cm-title {
+  margin: 0 0 0.4rem;
+  color: var(--typography-color);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semi-bold);
+}
+
+.cm-msg {
+  margin: 0;
+  color: var(--text-500);
+  font-size: var(--text-sm);
+}

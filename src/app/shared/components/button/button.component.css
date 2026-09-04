@@ -1,0 +1,101 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
+  padding: 0.45rem 1rem;
+  font-size: 0.875rem;
+  font-weight: var(--font-semi-bold);
+  letter-spacing: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--button-primary-color);
+  --bs-btn-hover-bg: var(--button-primary-hover-color);
+  --bs-btn-active-bg: var(--button-primary-hover-color);
+  --bs-btn-hover-border-color: var(--button-primary-hover-color);
+  --bs-btn-active-border-color: var(--button-primary-hover-color);
+  --bs-btn-disabled-bg: var(--button-primary-color);
+  --bs-btn-disabled-border-color: var(--button-primary-color);
+  --bs-btn-focus-shadow-rgb: 38, 115, 77;
+  background: var(--button-primary-color);
+  border-color: var(--button-primary-color);
+  color: var(--button-primary-text);
+}
+
+.btn-primary:hover {
+  background: var(--button-primary-hover-color);
+  color: var(--button-primary-text);
+  transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+  background: transparent;
+  border-color: var(--button-primary-color);
+  color: var(--button-primary-color);
+}
+
+.btn-outline-primary:hover {
+  background: var(--primary-lighter);
+  color: var(--button-primary-color);
+}
+
+.btn-outline-secondary {
+  background: transparent;
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+
+.btn-outline-secondary:hover {
+  background: #fff7e6;
+  color: var(--accent-dark);
+}
+
+.btn-danger {
+  background: var(--button-danger-color);
+  border-color: var(--button-danger-color);
+  color: var(--button-danger-text);
+}
+
+.btn-outline-danger {
+  background: transparent;
+  border-color: var(--button-danger-color);
+  color: var(--button-danger-color);
+}
+
+.btn-outline-danger:hover {
+  background: var(--alert-error-bg-color);
+  color: var(--button-danger-color);
+}
+
+.btn-sm {
+  min-width: 34px;
+  min-height: 32px;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.8rem;
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--text-600);
+  border-color: var(--text-600);
+  color: white;
+}
+
+.btn-secondary:hover { background: var(--text-700); color: white; }
+.btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.btn .material-symbols-outlined {
+  font-size: 1.08rem;
+}
