@@ -1,4 +1,5 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { BrandingService } from './core/services/branding.service';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
@@ -8,5 +9,7 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('frontend');
+  constructor() {
+    inject(BrandingService).load();
+  }
 }

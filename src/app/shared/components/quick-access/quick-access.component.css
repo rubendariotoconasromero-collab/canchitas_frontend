@@ -13,7 +13,7 @@
 }
 
 .quick-access-item:hover {
-  border-color: #add6be;
+  border-color: var(--accent);
   background: var(--primary-lighter);
   transform: translateY(-1px);
 }

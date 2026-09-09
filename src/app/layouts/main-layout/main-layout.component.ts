@@ -3,7 +3,7 @@ import { TopbarComponent } from '../../shared/components/layout/topbar/topbar.co
 import { StorageService } from '../../core/services/storage.service';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, interval, exhaustMap, catchError, EMPTY, fromEvent, merge } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { AuthService } from '../../core/services/auth.service';
@@ -44,6 +44,13 @@ export class MainLayoutComponent {
   readonly pageTitle = signal(this.resolvePageTitle(this.router.url));
 
   constructor() {
+    merge(interval(30000), fromEvent(window, 'focus')).pipe(
+      exhaustMap(() => this.auth.me().pipe(catchError(() => EMPTY))),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(() => {
+      const permission = this.router.routerState.snapshot.root.firstChild?.firstChild?.data['permission'];
+      if (permission && !this.auth.can(permission)) this.router.navigate(['/sin-acceso']);
+    });
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -84,6 +91,8 @@ export class MainLayoutComponent {
   private resolvePageTitle(url: string): string {
     const segment = url.split('?')[0].split('/').filter(Boolean)[0] ?? 'dashboard';
     const titles: Record<string, string> = {
+      canchas: 'Espacios deportivos', deportes: 'Deportes', negocio: 'Negocio',
+      sucursales: 'Sucursales', politicas: 'Politicas de reserva',
       dashboard: 'Resumen general',
       usuarios: 'Gestion de usuarios',
       roles: 'Gestion de roles',

@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { BrandingService } from '../../../core/services/branding.service';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 
@@ -10,29 +11,172 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
   selector: 'app-login',
   imports: [ReactiveFormsModule, InputComponent, ButtonComponent],
   template: `
-    <div class="login-card">
-      <div class="mb-4">
-        <span class="eyebrow">Acceso seguro</span>
-        <h1>Canchitas</h1>
-        <p>Ingresa con tu cuenta administrativa.</p>
+    <div class="login-card-master">
+      <!-- Identidad del negocio -->
+      <div class="auth-showcase">
+        <div class="auth-showcase-decor">
+          <div class="field-circle"></div>
+          <div class="field-line"></div>
+        </div>
+
+        <div class="auth-showcase-body">
+          <div class="auth-brand-badge">
+            <div class="brand-mark auth-logo-mark">
+              <span class="material-symbols-outlined">sports_soccer</span>
+            </div>
+            <div class="auth-brand-text">
+              <span class="auth-brand-title">{{ branding.name() }}</span>
+              <span class="auth-brand-tagline">Gestión de Complejos Deportivos</span>
+            </div>
+          </div>
+
+          <div class="auth-showcase-hero">
+            <h2>El control total de tus canchas en un solo lugar.</h2>
+            <p>
+              Optimiza alquileres, turnos, horarios y la administración de tu equipo
+              con la máxima fluidez, estabilidad y seguridad.
+            </p>
+          </div>
+
+          <div class="auth-features">
+            <div class="auth-feature-item">
+              <div class="auth-feature-icon">
+                <span class="material-symbols-outlined">calendar_month</span>
+              </div>
+              <div class="auth-feature-text">
+                <strong>Reservas en Tiempo Real</strong>
+                <span>Organización ágil de horarios y disponibilidad de canchas.</span>
+              </div>
+            </div>
+
+            <div class="auth-feature-item">
+              <div class="auth-feature-icon">
+                <span class="material-symbols-outlined">admin_panel_settings</span>
+              </div>
+              <div class="auth-feature-text">
+                <strong>Control de Usuarios y Roles</strong>
+                <span>Permisos granulares y seguridad garantizada para tu personal.</span>
+              </div>
+            </div>
+
+            <div class="auth-feature-item">
+              <div class="auth-feature-icon">
+                <span class="material-symbols-outlined">monitoring</span>
+              </div>
+              <div class="auth-feature-text">
+                <strong>Operaciones y Métricas</strong>
+                <span>Panel centralizado con reportes operativos al instante.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="auth-showcase-footer">
+            <div class="auth-status-chip">
+              <span class="auth-status-dot"></span>
+              <span>Sistema Operativo v1.0</span>
+            </div>
+            <span class="auth-ssl-badge">
+              <span class="material-symbols-outlined">lock</span>
+              Cifrado Seguro
+            </span>
+          </div>
+        </div>
       </div>
 
-      @if (error()) {
-        <div class="alert alert-danger py-2">{{ error() }}</div>
-      }
+      <!-- Columna Derecha: Formulario de Login -->
+      <div class="auth-form-container">
+        <!-- Marca visible solo en dispositivos móviles -->
+        <div class="auth-mobile-brand">
+          <div class="brand-mark auth-logo-mark">
+            <span class="material-symbols-outlined">sports_soccer</span>
+          </div>
+          <div>
+            <strong>{{ branding.name() }}</strong>
+            <small>Gestión Deportiva</small>
+          </div>
+        </div>
 
-      <form [formGroup]="form" (ngSubmit)="submit()" class="form-stack" novalidate>
-        <app-input label="Correo" type="email" formControlName="correo" autocomplete="email"
-          [required]="true" [errorMessage]="form.controls.correo.touched && form.controls.correo.invalid ? 'Ingresa un correo valido.' : ''" />
-        <app-input label="Password" type="password" [showToggle]="true" formControlName="password"
-          autocomplete="current-password" [required]="true"
-          [errorMessage]="form.controls.password.touched && form.controls.password.invalid ? 'Ingresa tu password.' : ''" />
-        <app-button type="submit" [fullWidth]="true" [loading]="loading()">Ingresar</app-button>
-      </form>
+        <div class="auth-form-header">
+          <div class="auth-role-pill">
+            <span class="material-symbols-outlined">shield</span>
+            <span>Acceso Seguro</span>
+          </div>
+          <h1 class="auth-form-title">Iniciar Sesión</h1>
+          <p class="auth-form-desc">Ingresa con tus credenciales para acceder al panel administrativo.</p>
+        </div>
+
+        @if (error()) {
+          <div class="auth-error-alert" role="alert">
+            <span class="material-symbols-outlined auth-error-icon">error</span>
+            <div class="auth-error-content">
+              <strong>Error al ingresar</strong>
+              <p>{{ error() }}</p>
+            </div>
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="form-stack auth-form" novalidate>
+          <div class="auth-input-group">
+            <app-input
+              label="Correo electrónico"
+              type="email"
+              placeholder="correo@ejemplo.com"
+              formControlName="correo"
+              autocomplete="email"
+              [required]="true"
+              [errorMessage]="form.controls.correo.touched && form.controls.correo.invalid ? 'Ingresa un correo electrónico válido.' : ''"
+            />
+          </div>
+
+          <div class="auth-input-group">
+            <app-input
+              label="Contraseña"
+              type="password"
+              placeholder="••••••••"
+              [showToggle]="true"
+              formControlName="password"
+              autocomplete="current-password"
+              [required]="true"
+              [errorMessage]="form.controls.password.touched && form.controls.password.invalid ? 'Ingresa tu contraseña de acceso.' : ''"
+            />
+          </div>
+
+          <div class="auth-form-options">
+            <label class="auth-remember-label">
+              <input type="checkbox" class="form-check-input" />
+              <span>Recordar sesión</span>
+            </label>
+            <span class="auth-help-link" title="Consulta con el administrador en caso de problemas con tu cuenta">
+              <span class="material-symbols-outlined">help_outline</span>
+              ¿Necesitas ayuda?
+            </span>
+          </div>
+
+          <div class="auth-submit-block">
+            <app-button
+              type="submit"
+              [fullWidth]="true"
+              [loading]="loading()"
+              icon="login"
+              size="lg"
+            >
+              {{ loading() ? 'Comprobando acceso...' : 'Ingresar' }}
+            </app-button>
+          </div>
+        </form>
+
+        <div class="auth-form-footer">
+          <div class="auth-security-legend">
+            <span class="material-symbols-outlined">verified_user</span>
+            <span>Acceso restringido únicamente a usuarios autorizados</span>
+          </div>
+        </div>
+      </div>
     </div>
   `,
 })
 export class LoginComponent {
+  readonly branding = inject(BrandingService);
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);

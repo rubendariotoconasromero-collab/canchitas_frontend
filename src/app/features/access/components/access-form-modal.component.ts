@@ -25,7 +25,7 @@ export interface AccessFormData {
             [placeholder]="entity() === 'rol' ? 'Administrador' : 'acceso_usuarios'"
             [errorMessage]="form.controls.nombre.touched && form.controls.nombre.invalid ? 'Este campo es requerido.' : ''" />
           <app-textarea label="Descripcion" formControlName="descripcion" />
-          @if (data()) {
+          @if (data() && canChangeState()) {
             <app-checkbox formControlName="estado" [label]="entity() === 'rol' ? 'Rol activo' : 'Permiso activo'" />
           }
         </div>
@@ -40,6 +40,7 @@ export interface AccessFormData {
 export class AccessFormModalComponent {
   readonly open = input(false);
   readonly saving = input(false);
+  readonly canChangeState = input(true);
   readonly entity = input.required<'rol' | 'permiso'>();
   readonly data = input<AccessFormData | null>(null);
   readonly saved = output<AccessFormData>();

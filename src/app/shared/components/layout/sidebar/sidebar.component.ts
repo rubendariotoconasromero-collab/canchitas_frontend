@@ -2,10 +2,13 @@ import { Component, DestroyRef, inject, input, output, signal } from '@angular/c
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CanDirective } from '../../../directives/can.directive';
+import { AuthService } from '../../../../core/services/auth.service';
+import { BrandingService } from '../../../../core/services/branding.service';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, CanDirective],
   host: { style: 'display: contents' },
   template: `
       <aside class="sidebar" aria-label="Navegacion principal">
@@ -14,13 +17,23 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
             <span class="material-symbols-outlined">sports_soccer</span>
           </span>
           <div class="brand-copy">
-            <strong>Canchitas</strong>
+            <strong>{{ branding.name() }}</strong>
             <small>Panel administrativo</small>
           </div>
         </div>
 
         <nav class="sidebar-nav">
-          <div class="nav-section">
+          @if (auth.can('canchas.ver') || auth.can('deportes.ver') || auth.can('sucursales.ver') || auth.can('negocio.ver') || auth.can('politicas.ver')) {
+            <div class="nav-section">
+              <span class="nav-section-label">Espacios deportivos</span>
+              <a *appCan="'canchas.ver'" class="nav-item" routerLink="/canchas" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">sports_soccer</span><span>Canchas</span></a>
+              <a *appCan="'deportes.ver'" class="nav-item" routerLink="/deportes" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">sports</span><span>Deportes</span></a>
+              <a *appCan="'sucursales.ver'" class="nav-item" routerLink="/sucursales" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">location_on</span><span>Sucursales</span></a>
+              <a *appCan="'politicas.ver'" class="nav-item" routerLink="/politicas" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">policy</span><span>Politicas</span></a>
+              <a *appCan="'negocio.ver'; global: true" class="nav-item" routerLink="/negocio" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">storefront</span><span>Negocio</span></a>
+            </div>
+          }
+          <div class="nav-section" *appCan="'dashboard.ver'">
             <span class="nav-section-label">Principal</span>
             <a
               class="nav-item"
@@ -34,6 +47,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
             </a>
           </div>
 
+          @if (auth.can('usuarios.ver') || auth.can('roles.ver') || auth.can('permisos.ver')) {
           <div class="nav-section">
             <span class="nav-section-label">Administracion</span>
             <button
@@ -49,20 +63,21 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
               <span class="material-symbols-outlined nav-chevron" aria-hidden="true">{{ accessExpanded() ? 'expand_less' : 'expand_more' }}</span>
             </button>
             <div id="access-submenu" class="nav-submenu" [hidden]="!accessExpanded()">
-            <a class="nav-item" routerLink="/usuarios" routerLinkActive="active" (click)="navigated.emit()">
+            <a *appCan="'usuarios.ver'" class="nav-item" routerLink="/usuarios" routerLinkActive="active" (click)="navigated.emit()">
               <span class="material-symbols-outlined">group</span>
               <span>Usuarios</span>
             </a>
-            <a class="nav-item" routerLink="/roles" routerLinkActive="active" (click)="navigated.emit()">
+            <a *appCan="'roles.ver'" class="nav-item" routerLink="/roles" routerLinkActive="active" (click)="navigated.emit()">
               <span class="material-symbols-outlined">admin_panel_settings</span>
               <span>Roles</span>
             </a>
-            <a class="nav-item" routerLink="/permisos" routerLinkActive="active" (click)="navigated.emit()">
+            <a *appCan="'permisos.ver'" class="nav-item" routerLink="/permisos" routerLinkActive="active" (click)="navigated.emit()">
               <span class="material-symbols-outlined">key</span>
               <span>Permisos</span>
             </a>
             </div>
           </div>
+          }
         </nav>
 
         <div class="sidebar-footer">
@@ -82,6 +97,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   `,
 })
 export class SidebarComponent {
+  readonly branding = inject(BrandingService);
+  readonly auth = inject(AuthService);
   readonly userName = input('Usuario');
   readonly userEmail = input('');
   readonly navigated = output<void>();
@@ -104,4 +121,3 @@ export class SidebarComponent {
     return /^\/(usuarios|roles|permisos)(?:[/?#]|$)/.test(url);
   }
 }
-

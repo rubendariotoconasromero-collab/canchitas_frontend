@@ -24,7 +24,9 @@
   --bs-btn-active-border-color: var(--button-primary-hover-color);
   --bs-btn-disabled-bg: var(--button-primary-color);
   --bs-btn-disabled-border-color: var(--button-primary-color);
-  --bs-btn-focus-shadow-rgb: 38, 115, 77;
+  --bs-btn-focus-shadow-rgb: 158, 121, 31;
+  --bs-btn-active-color: var(--button-primary-text);
+  --bs-btn-disabled-color: var(--button-primary-text);
   background: var(--button-primary-color);
   border-color: var(--button-primary-color);
   color: var(--button-primary-text);
@@ -39,12 +41,12 @@
 .btn-outline-primary {
   background: transparent;
   border-color: var(--button-primary-color);
-  color: var(--button-primary-color);
+  color: var(--primary);
 }
 
 .btn-outline-primary:hover {
   background: var(--primary-lighter);
-  color: var(--button-primary-color);
+  color: var(--primary);
 }
 
 .btn-outline-secondary {

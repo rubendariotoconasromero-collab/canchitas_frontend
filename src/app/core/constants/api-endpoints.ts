@@ -1,4 +1,6 @@
-export const API_BASE_URL = 'http://127.0.0.1:8000/api';
+import { environment } from '../../../environments/environment';
+
+export const API_BASE_URL = environment.apiBaseUrl;
 
 export const API_ENDPOINTS = {
   login: `${API_BASE_URL}/login/`,

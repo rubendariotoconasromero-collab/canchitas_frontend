@@ -34,6 +34,8 @@ export interface RolPermisoUsuario {
 }
 
 export interface Usuario {
+  permisos_efectivos?: string[];
+  alcance_global?: boolean;
   id: number;
   nombre: string;
   correo: string;

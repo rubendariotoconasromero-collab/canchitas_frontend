@@ -14,6 +14,8 @@ describe('Shared layout navigation', () => {
         provideRouter(routes), provideHttpClient(), provideHttpClientTesting(),
         { provide: AuthService, useValue: {
           isAuthenticated: () => true,
+          can: () => true,
+          me: () => of({ user: { nombre: 'Prueba', correo: 'prueba@example.test' } }),
           currentUser: () => ({ nombre: 'Prueba', correo: 'prueba@example.test' }),
           logout: () => of({ message: 'ok' }),
         } },

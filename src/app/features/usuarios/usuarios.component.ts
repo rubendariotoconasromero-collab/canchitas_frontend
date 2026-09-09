@@ -1,4 +1,6 @@
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { CanDirective } from '../../shared/directives/can.directive';
+import { AuthService } from '../../core/services/auth.service';
 import { ListToolbarComponent } from '../../shared/components/list-toolbar/list-toolbar.component';
 import { ListShellComponent } from '../../shared/components/list-shell/list-shell.component';
 import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, computed, inject, signal } from '@angular/core';
@@ -16,7 +18,7 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
   selector: 'app-usuarios',
   standalone: true,
   imports: [PageHeaderComponent, ListToolbarComponent, ListShellComponent, 
-    ButtonComponent,
+    ButtonComponent, CanDirective,
     BadgeComponent,
     ConfirmationModalComponent,
     UsuarioModalComponent,
@@ -27,7 +29,7 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
   template: `
     <div class="main-content">
       <app-page-header title="Usuarios" icon="group">
-        <app-button icon="add" (clicked)="openCreate()">Nuevo usuario</app-button>
+        <app-button *appCan="'usuarios.crear'" icon="add" (clicked)="openCreate()">Nuevo usuario</app-button>
       </app-page-header>
 
       <app-list-toolbar searchLabel="Buscar usuario" entity="usuarios"
@@ -57,7 +59,7 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
                 </div>
               </div>
               <div class="list-col hide-sm list-col-muted">{{ usuario.correo }}</div>
-              <div class="list-col hide-sm">{{ usuario.sucursal?.nombre || 'Todas' }}</div>
+              <div class="list-col hide-sm">{{ usuario.alcance_global ? 'Global' : (usuario.sucursal?.nombre || 'Sin sucursal') }}</div>
               <div class="list-col center-col">
                 <app-badge [active]="usuario.estado" />
               </div>
@@ -67,6 +69,8 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
                   variant="outline-primary"
                   icon="admin_panel_settings"
                   title="Accesos"
+                  *appCan="'usuarios.asignar_accesos'"
+                  [disabled]="usuario.id === auth.currentUser()?.id"
                   (clicked)="openAsignaciones(usuario)"
                 />
                 <app-button
@@ -74,11 +78,13 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
                   variant="outline-secondary"
                   icon="edit"
                   title="Editar"
+                  *appCan="'usuarios.editar'"
                   (clicked)="openEdit(usuario)"
                 />
                 <app-button
                   size="sm"
                   [variant]="usuario.estado ? 'outline-danger' : 'outline-primary'"
+                  *appCan="'usuarios.cambiar_estado'"
                   [icon]="usuario.estado ? 'toggle_off' : 'toggle_on'"
                   [title]="usuario.estado ? 'Desactivar' : 'Activar'"
                   (clicked)="confirmToggle(usuario)"
@@ -92,6 +98,7 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
     <app-usuario-modal
       [open]="showModal()"
       [editing]="editingId() !== null"
+      [canChangeState]="auth.can('usuarios.cambiar_estado')"
       [saving]="saving()"
       [data]="usuarioData()"
       [sucursales]="sucursales()"
@@ -121,6 +128,7 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
   `,
 })
 export class UsuariosComponent implements OnInit {
+  readonly auth = inject(AuthService);
   private readonly service = inject(UsuarioService);
   private readonly snackbar = inject(SnackbarService);
 
@@ -158,11 +166,11 @@ export class UsuariosComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
-    this.service.sucursales().subscribe({
+    if (this.auth.can('usuarios.crear') || this.auth.can('usuarios.editar')) this.service.sucursales().subscribe({
       next: (sucursales) => this.sucursales.set(sucursales),
       error: () => this.snackbar.error('No se pudieron cargar las sucursales.'),
     });
-    this.service.roles().subscribe({
+    if (this.auth.can('usuarios.asignar_accesos')) this.service.roles().subscribe({
       next: (roles) => this.roles.set(roles),
       error: () => this.snackbar.error('No se pudieron cargar los roles.'),
     });
@@ -186,7 +194,10 @@ export class UsuariosComponent implements OnInit {
 
   openCreate(): void {
     this.editingId.set(null);
-    this.usuarioData.set(null);
+    this.usuarioData.set(this.auth.currentUser()?.alcance_global ? null : {
+      nombre: '', correo: '', estado: true,
+      sucursal_id: this.auth.currentUser()?.sucursal?.id ?? null,
+    });
     this.showModal.set(true);
   }
 

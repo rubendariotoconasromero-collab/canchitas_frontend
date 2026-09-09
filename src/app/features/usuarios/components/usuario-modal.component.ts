@@ -53,7 +53,7 @@ export interface UsuarioFormData {
                   formControlName="correo"
                   [required]="true"
                   [errorMessage]="err('correo')"
-                  placeholder="usuario@canchitas.com"
+                  placeholder="usuario@ejemplo.com"
                 />
               </div>
 
@@ -73,11 +73,11 @@ export interface UsuarioFormData {
                   label="Sucursal"
                   formControlName="sucursal_id"
                   [options]="sucursalOptions()"
-                  placeholder="Todas (admin)"
+                  placeholder="Sin sucursal"
                 />
               </div>
 
-              @if (editing()) {
+              @if (editing() && canChangeState()) {
                 <app-checkbox formControlName="estado" label="Usuario activo" />
               }
             </div>
@@ -96,6 +96,7 @@ export class UsuarioModalComponent {
   open = input(false);
   editing = input(false);
   saving = input(false);
+  canChangeState = input(true);
   data = input<UsuarioFormData | null>(null);
   sucursales = input<Sucursal[]>([]);
 

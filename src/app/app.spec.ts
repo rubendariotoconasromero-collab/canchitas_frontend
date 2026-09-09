@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
+import { BrandingService } from './core/services/branding.service';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [{ provide: BrandingService, useValue: { load: () => {} } }],
     }).compileComponents();
   });
 

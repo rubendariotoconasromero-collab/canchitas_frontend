@@ -1,4 +1,6 @@
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { CanDirective } from '../../shared/directives/can.directive';
+import { AuthService } from '../../core/services/auth.service';
 import { ListToolbarComponent } from '../../shared/components/list-toolbar/list-toolbar.component';
 import { ListShellComponent } from '../../shared/components/list-shell/list-shell.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
@@ -16,13 +18,13 @@ import { RolPayload, RolService } from './rol.service';
 @Component({
   selector: 'app-roles',
   standalone: true,
-  imports: [PageHeaderComponent, ListToolbarComponent, ListShellComponent, ModalComponent, CheckboxComponent, AccessFormModalComponent, ButtonComponent, BadgeComponent, ConfirmationModalComponent],
+  imports: [CanDirective, PageHeaderComponent, ListToolbarComponent, ListShellComponent, ModalComponent, CheckboxComponent, AccessFormModalComponent, ButtonComponent, BadgeComponent, ConfirmationModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
     <div class="main-content">
       <app-page-header title="Roles" icon="badge">
-        <app-button icon="add" (clicked)="openCreate()">Nuevo rol</app-button>
+        <app-button *appCan="'roles.crear'; global: true" icon="add" (clicked)="openCreate()">Nuevo rol</app-button>
       </app-page-header>
 
       <app-list-toolbar searchLabel="Buscar rol" entity="roles"
@@ -47,11 +49,12 @@ import { RolPayload, RolService } from './rol.service';
               <div class="list-col center-col">{{ rol.permisos?.length ?? 0 }}</div>
               <div class="list-col center-col"><app-badge [active]="rol.estado" /></div>
               <div class="list-col list-col-actions">
-                <app-button size="sm" variant="outline-primary" icon="rule" title="Permisos" (clicked)="openPermisos(rol)" />
-                <app-button size="sm" variant="outline-secondary" icon="edit" title="Editar" (clicked)="openEdit(rol)" />
+                <app-button *appCan="'roles.asignar_permisos'; global: true" size="sm" variant="outline-primary" icon="rule" title="Permisos" (clicked)="openPermisos(rol)" />
+                <app-button *appCan="'roles.editar'; global: true" size="sm" variant="outline-secondary" icon="edit" title="Editar" (clicked)="openEdit(rol)" />
                 <app-button
                   size="sm"
                   [variant]="rol.estado ? 'outline-danger' : 'outline-primary'"
+                  *appCan="'roles.cambiar_estado'; global: true"
                   [icon]="rol.estado ? 'toggle_off' : 'toggle_on'"
                   [title]="rol.estado ? 'Desactivar' : 'Activar'"
                   (clicked)="confirmToggle(rol)"
@@ -63,6 +66,7 @@ import { RolPayload, RolService } from './rol.service';
     </div>
 
     <app-access-form-modal entity="rol" [open]="showModal()" [data]="formData()"
+      [canChangeState]="auth.can('roles.cambiar_estado', true)"
       [saving]="saving()" (saved)="save($event)" (cancelled)="showModal.set(false)" />
 
     <app-modal [open]="showPermisos()" [title]="'Permisos de ' + (permisoTarget()?.nombre ?? '')"
@@ -102,6 +106,7 @@ import { RolPayload, RolService } from './rol.service';
   `,
 })
 export class RolesComponent implements OnInit {
+  readonly auth = inject(AuthService);
   private readonly service = inject(RolService);
   private readonly snackbar = inject(SnackbarService);
   readonly formData = signal<AccessFormData | null>(null);
@@ -131,7 +136,7 @@ export class RolesComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
-    this.service.permisos().subscribe({
+    if (this.auth.can('roles.asignar_permisos', true)) this.service.permisos().subscribe({
       next: (permisos) => this.permisos.set(permisos),
       error: () => this.snackbar.error('No se pudieron cargar los permisos.'),
     });

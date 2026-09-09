@@ -1,4 +1,6 @@
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { CanDirective } from '../../shared/directives/can.directive';
+import { AuthService } from '../../core/services/auth.service';
 import { ListToolbarComponent } from '../../shared/components/list-toolbar/list-toolbar.component';
 import { ListShellComponent } from '../../shared/components/list-shell/list-shell.component';
 import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, computed, inject, signal } from '@angular/core';
@@ -14,13 +16,13 @@ import { PermisoPayload, PermisoService } from './permiso.service';
 @Component({
   selector: 'app-permisos',
   standalone: true,
-  imports: [PageHeaderComponent, ListToolbarComponent, ListShellComponent, AccessFormModalComponent, ButtonComponent, BadgeComponent, ConfirmationModalComponent],
+  imports: [CanDirective, PageHeaderComponent, ListToolbarComponent, ListShellComponent, AccessFormModalComponent, ButtonComponent, BadgeComponent, ConfirmationModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
     <div class="main-content">
       <app-page-header title="Permisos" icon="rule">
-        <app-button icon="add" (clicked)="openCreate()">Nuevo permiso</app-button>
+        <app-button *appCan="'permisos.crear'; global: true" icon="add" (clicked)="openCreate()">Nuevo permiso</app-button>
       </app-page-header>
 
       <app-list-toolbar searchLabel="Buscar permiso" entity="permisos"
@@ -43,10 +45,11 @@ import { PermisoPayload, PermisoService } from './permiso.service';
               <div class="list-col hide-sm list-col-muted">{{ permiso.descripcion || 'Sin descripcion' }}</div>
               <div class="list-col center-col"><app-badge [active]="permiso.estado" /></div>
               <div class="list-col list-col-actions">
-                <app-button size="sm" variant="outline-secondary" icon="edit" title="Editar" (clicked)="openEdit(permiso)" />
+                <app-button *appCan="'permisos.editar'; global: true" size="sm" variant="outline-secondary" icon="edit" title="Editar" (clicked)="openEdit(permiso)" />
                 <app-button
                   size="sm"
                   [variant]="permiso.estado ? 'outline-danger' : 'outline-primary'"
+                  *appCan="'permisos.cambiar_estado'; global: true"
                   [icon]="permiso.estado ? 'toggle_off' : 'toggle_on'"
                   [title]="permiso.estado ? 'Desactivar' : 'Activar'"
                   (clicked)="confirmToggle(permiso)"
@@ -58,6 +61,7 @@ import { PermisoPayload, PermisoService } from './permiso.service';
     </div>
 
     <app-access-form-modal entity="permiso" [open]="showModal()" [data]="formData()"
+      [canChangeState]="auth.can('permisos.cambiar_estado', true)"
       [saving]="saving()" (saved)="save($event)" (cancelled)="showModal.set(false)" />
 
     <app-confirmation-modal
@@ -72,6 +76,7 @@ import { PermisoPayload, PermisoService } from './permiso.service';
   `,
 })
 export class PermisosComponent implements OnInit {
+  readonly auth = inject(AuthService);
   private readonly service = inject(PermisoService);
   private readonly snackbar = inject(SnackbarService);
   readonly formData = signal<AccessFormData | null>(null);

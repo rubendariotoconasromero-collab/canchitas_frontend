@@ -10,7 +10,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 let nextId = 0;
 
-export type InputType = 'text' | 'email' | 'password' | 'number' | 'date' | 'tel' | 'search';
+export type InputType = 'text' | 'email' | 'password' | 'number' | 'date' | 'time' | 'url' | 'tel' | 'search';
 
 @Component({
   selector: 'app-input',

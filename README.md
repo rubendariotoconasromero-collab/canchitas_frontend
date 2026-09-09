@@ -12,6 +12,16 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+The Django API must be running at `http://127.0.0.1:8000`. Requests to `/api/**`
+are forwarded there by `proxy.conf.json`. Restart `ng serve` after changing this
+configuration. A production static server needs its own `/api` reverse proxy;
+the Angular development proxy is not included in the build output.
+
+The configured local address is `http://localhost:4200/login`. Avoid starting a
+second server with `--host 127.0.0.1` on the same port: Windows can run separate
+IPv4 and IPv6 listeners, so localhost may reach an older Angular process. Stop
+the old `ng serve` terminal and run `npm start` again after a proxy change.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:

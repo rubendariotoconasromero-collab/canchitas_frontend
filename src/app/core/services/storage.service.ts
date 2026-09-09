@@ -18,7 +18,12 @@ export class StorageService {
 
   getUser(): Usuario | null {
     const raw = localStorage.getItem(USER_KEY);
-    return raw ? JSON.parse(raw) as Usuario : null;
+    try {
+      return raw ? JSON.parse(raw) as Usuario : null;
+    } catch {
+      this.clear();
+      return null;
+    }
   }
 
   clear(): void {

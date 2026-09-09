@@ -1,6 +1,10 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
+import { permissionGuard } from './core/guards/permission.guard';
+import { NoAccessComponent } from './features/access/no-access.component';
+import { CatalogPageComponent } from './features/catalogo/catalog-page.component';
+import { CanchaDetailComponent } from './features/catalogo/cancha-detail.component';
 import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
@@ -10,6 +14,7 @@ import { RolesComponent } from './features/roles/roles.component';
 import { UsuariosComponent } from './features/usuarios/usuarios.component';
 
 export const routes: Routes = [
+  { path: 'sin-acceso', component: NoAccessComponent, canActivate: [authGuard] },
   {
     path: 'login',
     component: AuthLayoutComponent,
@@ -19,12 +24,19 @@ export const routes: Routes = [
     path: '',
     component: MainLayoutComponent,
     canActivate: [authGuard],
+    canActivateChild: [permissionGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'usuarios', component: UsuariosComponent },
-      { path: 'roles', component: RolesComponent },
-      { path: 'permisos', component: PermisosComponent },
+      { path: 'negocio', component: CatalogPageComponent, data: {permission:'negocio.ver',catalog:'negocios'} },
+      { path: 'sucursales', component: CatalogPageComponent, data: {permission:'sucursales.ver',catalog:'sucursales'} },
+      { path: 'deportes', component: CatalogPageComponent, data: {permission:'deportes.ver',catalog:'deportes'} },
+      { path: 'canchas', component: CatalogPageComponent, data: {permission:'canchas.ver',catalog:'canchas'} },
+      { path: 'canchas/:id', component: CanchaDetailComponent, data: {permission:'canchas.ver'} },
+      { path: 'politicas', component: CatalogPageComponent, data: {permission:'politicas.ver',catalog:'politicas'} },
+      { path: 'dashboard', component: DashboardComponent, data: { permission: 'dashboard.ver' } },
+      { path: 'usuarios', component: UsuariosComponent, data: { permission: 'usuarios.ver' } },
+      { path: 'roles', component: RolesComponent, data: { permission: 'roles.ver' } },
+      { path: 'permisos', component: PermisosComponent, data: { permission: 'permisos.ver' } },
     ],
   },
   { path: '**', redirectTo: '' },
