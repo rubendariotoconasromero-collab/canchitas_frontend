@@ -36,11 +36,25 @@ describe('Catalog forms', () => {
     const fixture = setup('canchas');
     const component = fixture.componentInstance;
     component.edit();fixture.detectChanges();
+    expect(component.form.contains('anticipacion_minutos')).toBeFalse();
     expect(component.form.get('duracion_minima_minutos')?.value).toBe(60);
     component.form.patchValue({sucursal:'1',codigo:'A',nombre:'Cancha',duracion_minima_minutos:0});
     component.save();expect(service.save).not.toHaveBeenCalled();
     component.form.patchValue({duracion_minima_minutos:90});component.save();
     expect((service.save.calls.mostRecent().args[1] as CatalogRow)['duracion_minima_minutos']).toBe(90);
+    expect((service.save.calls.mostRecent().args[1] as CatalogRow)['anticipacion_minutos']).toBeUndefined();
+  });
+  it('organizes the court form into clear sections and paired rows', () => {
+    const fixture = setup('canchas');
+    fixture.componentInstance.edit();
+    fixture.detectChanges();
+    const form: HTMLElement = fixture.nativeElement.querySelector('[data-catalog="canchas"]');
+    const sections = Array.from(form.querySelectorAll('.catalog-form-section')).map(element => element.textContent?.trim());
+    expect(sections).toEqual(['Identificacion de la cancha', 'Condiciones de alquiler', 'Caracteristicas y estado']);
+    expect(form.querySelectorAll('.checkbox-option').length).toBe(4);
+    const fields = CATALOG['canchas'].fields.map(field => field.key);
+    expect(fields.indexOf('superficie')).toBe(fields.indexOf('nombre') + 1);
+    expect(fields.indexOf('descripcion_publica')).toBe(fields.indexOf('superficie') + 1);
   });
   it('shows a single business configuration and only updates its existing id', () => {
     const business = {id:1,nombre_comercial:'Soccer Real Madrid',moneda:'BOB',publicado:false};

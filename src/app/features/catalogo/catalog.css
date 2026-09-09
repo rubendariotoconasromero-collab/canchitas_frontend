@@ -11,8 +11,15 @@
 .catalog-actions .material-symbols-outlined { font-size: 18px; vertical-align: middle; }
 .catalog-status { color: #166045; background: #e6f4eb; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
 .catalog-status.off { color: #795321; background: #fbf0d9; }
-.catalog-form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.catalog-form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px 16px; }
 .catalog-form-grid .wide { grid-column: 1/-1; }
+.catalog-form-section { grid-column: 1/-1; display: flex; align-items: center; gap: 12px; margin-top: 4px; color: var(--primary-dark); font-size: 0.78rem; font-weight: var(--font-bold); text-transform: uppercase; }
+.catalog-form-section::after { content: ''; height: 1px; flex: 1; background: var(--primary-light); }
+.catalog-form-section:first-child { margin-top: 0; }
+.catalog-form-field { min-width: 0; }
+[data-catalog='canchas'] .checkbox-option { display: flex; align-items: center; min-height: 46px; padding: 10px 12px; border: 1px solid var(--container-border-color); border-radius: var(--border-radius); background: var(--bg-elevated); }
+[data-catalog='canchas'] .checkbox-option:focus-within { border-color: var(--input-field-focus-color); box-shadow: 0 0 0 3px var(--focus-ring); }
+[data-catalog='canchas'] .checkbox-option app-checkbox { width: 100%; }
 .photo-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(230px,1fr)); gap: 20px; padding: 16px; }
 .photo-grid figure { margin: 0; border: 1px solid #dbe2e5; border-radius: 6px; overflow: hidden; }
 .photo-grid img { width: 100%; aspect-ratio: 4/3; object-fit: contain; background: #f3f6f7; }
@@ -22,7 +29,7 @@
 .catalog-tabs button { background: transparent; border: 0; border-bottom: 3px solid transparent; padding: 12px; white-space: nowrap; color: #53636b; }
 .catalog-tabs button.active { color: var(--primary); border-bottom-color: var(--accent); }
 .court-summary { display: flex; gap: 24px; flex-wrap: wrap; margin: 18px 0; }
-@media (max-width: 640px) { .catalog-form-grid { grid-template-columns: minmax(0,1fr); } .catalog-toolbar { flex-wrap: wrap; } .catalog-table td, .catalog-table th { padding: 10px; } }
+@media (max-width: 640px) { .catalog-form-grid { grid-template-columns: minmax(0,1fr); } .catalog-toolbar { flex-wrap: wrap; } .catalog-table td, .catalog-table th { padding: 10px; } .catalog-form-section { margin-top: 6px; } }
 .business-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 0; padding: 24px; }
 .business-details .wide { grid-column: 1 / -1; }
 .business-details dt { color: var(--text-500); font-size: 0.875rem; margin-bottom: 6px; }

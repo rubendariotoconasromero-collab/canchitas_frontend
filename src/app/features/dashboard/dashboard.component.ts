@@ -1,6 +1,7 @@
 import { MetricCardComponent } from '../../shared/components/metric-card/metric-card.component';
 import { QuickAccessComponent } from '../../shared/components/quick-access/quick-access.component';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { BrandingService } from '../../core/services/branding.service';
 import { CanDirective } from '../../shared/directives/can.directive';
 import { ButtonLinkComponent } from '../../shared/components/button/button-link.component';
 
@@ -11,9 +12,9 @@ import { ButtonLinkComponent } from '../../shared/components/button/button-link.
     <div class="dashboard-page">
       <section class="dashboard-welcome">
         <div>
-          <span class="eyebrow">Modulo de seguridad</span>
-          <h2>Administracion de accesos</h2>
-          <p>Gestiona las cuentas, los roles y los permisos de acceso desde un solo lugar.</p>
+          <span class="eyebrow">Panel de Control & Reservas</span>
+          <h2>{{ branding.name() }}</h2>
+          <p>Gestiona los alquileres de canchas, espacios deportivos, usuarios y accesos desde un solo lugar.</p>
         </div>
         <app-button-link *appCan="'usuarios.ver'" route="/usuarios" icon="person_add">
           Gestionar usuarios
@@ -43,4 +44,6 @@ import { ButtonLinkComponent } from '../../shared/components/button/button-link.
     </div>
   `,
 })
-export class DashboardComponent {}
+export class DashboardComponent {
+  readonly branding = inject(BrandingService);
+}

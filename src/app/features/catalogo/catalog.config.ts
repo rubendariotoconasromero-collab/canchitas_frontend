@@ -3,6 +3,7 @@ export interface Field {
   key: string; label: string; type?: 'text' | 'number' | 'date' | 'time' | 'email' | 'url' | 'textarea' | 'select' | 'checkbox' | 'file';
   required?: boolean; initial?: any; min?: number; max?: number;
   options?: { value: string; label: string }[]; lookup?: string; labelKey?: string; nullable?: boolean;
+  sectionBefore?: string;
 }
 export interface CatalogConfig {
   endpoint: string; title: string; icon: string; permission: string; global?: boolean;
@@ -39,12 +40,13 @@ export const CATALOG: Record<string, CatalogConfig> = {
   canchas: {endpoint:'canchas',title:'Canchas',icon:'sports_soccer',permission:'canchas',state:'activa',
     columns:[{key:'nombre',label:'Cancha'},{key:'sucursal_nombre',label:'Sucursal'},{key:'superficie',label:'Superficie'},
       {key:'duracion_minima_minutos',label:'Minimo (min)'},{key:'publicada',label:'Publicada'}],fields:[
-      branch,{key:'codigo',label:'Codigo',required:true},{key:'nombre',label:'Nombre',required:true},
+      {...branch,sectionBefore:'Identificacion de la cancha'},
+      {key:'codigo',label:'Codigo',required:true},{key:'nombre',label:'Nombre',required:true},
+      {key:'superficie',label:'Superficie'},
       {key:'descripcion_publica',label:'Descripcion publica',type:'textarea'},
-      {key:'superficie',label:'Superficie'},{key:'capacidad_personas',label:'Capacidad',type:'number',initial:10,min:1,required:true},
+      {key:'capacidad_personas',label:'Capacidad de personas',type:'number',initial:10,min:1,required:true,sectionBefore:'Condiciones de alquiler'},
       {key:'duracion_minima_minutos',label:'Duracion minima (minutos)',type:'number',initial:60,min:1,required:true},
-      {key:'anticipacion_minutos',label:'Anticipacion web (minutos)',type:'number',initial:0,min:0,required:true},
-      {key:'techada',label:'Techada',type:'checkbox',initial:false},
+      {key:'techada',label:'Cancha techada',type:'checkbox',initial:false,sectionBefore:'Caracteristicas y estado'},
       {key:'iluminacion',label:'Con iluminacion',type:'checkbox',initial:false},
       {key:'activa',label:'Activa',type:'checkbox',initial:true},
       {key:'publicada',label:'Publicada',type:'checkbox',initial:false}]},

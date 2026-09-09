@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="100%" height="100%">
+  <defs>
+    <linearGradient id="favGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE072"/>
+      <stop offset="50%" stop-color="#FEBE10"/>
+      <stop offset="100%" stop-color="#B87D00"/>
+    </linearGradient>
+    <linearGradient id="favPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7336A8"/>
+      <stop offset="100%" stop-color="#411669"/>
+    </linearGradient>
+    <clipPath id="favCircleClip">
+      <circle cx="100" cy="148" r="68"/>
+    </clipPath>
+  </defs>
+  <circle cx="100" cy="148" r="76" fill="url(#favGold)" stroke="#8A5C00" stroke-width="2"/>
+  <circle cx="100" cy="148" r="69" fill="#FFFFFF"/>
+  <g clip-path="url(#favCircleClip)">
+    <circle cx="100" cy="148" r="68" fill="#FAF9F5"/>
+    <path d="M 25,95 L 125,225 L 175,225 L 75,95 Z" fill="url(#favPurple)"/>
+    <path d="M 128,105 C 80,92 58,118 58,148 C 58,178 80,204 128,191 C 120,183 118,179 116,173 C 86,182 73,168 73,148 C 73,128 86,114 116,123 Z" fill="url(#favGold)" stroke="#8A5C00" stroke-width="1.2"/>
+    <path d="M 72,176 L 72,120 L 84,120 L 100,154 L 116,120 L 128,120 L 128,176 L 117,176 L 117,138 L 104,166 L 96,166 L 83,138 L 83,176 Z" fill="url(#favGold)" stroke="#8A5C00" stroke-width="1.2"/>
+    <path d="M 94,185 L 94,115 L 114,115 L 114,124 L 104,124 L 104,142 L 112,142 L 112,150 L 104,150 L 104,185 Z" fill="#FFFFFF" stroke="#8A5C00" stroke-width="1.2"/>
+  </g>
+  <circle cx="100" cy="148" r="68" fill="none" stroke="url(#favGold)" stroke-width="2.5"/>
+  <!-- Corona simplificada pero nítida para favicon -->
+  <path d="M 58,74 C 55,48 78,38 100,38 C 122,38 145,48 142,74 C 120,80 80,80 58,74 Z" fill="#A81D24"/>
+  <path d="M 52,90 C 75,98 125,98 148,90 C 146,81 144,77 141,74 C 120,80 80,80 59,74 C 56,77 54,81 52,90 Z" fill="url(#favGold)" stroke="#8A5C00" stroke-width="1"/>
+  <ellipse cx="100" cy="86" rx="4" ry="2.5" fill="#D32F2F"/>
+  <ellipse cx="78" cy="85" rx="3.5" ry="2.2" fill="#1976D2"/>
+  <ellipse cx="122" cy="85" rx="3.5" ry="2.2" fill="#1976D2"/>
+  <circle cx="100" cy="24" r="5.5" fill="url(#favGold)" stroke="#8A5C00" stroke-width="0.8"/>
+  <path d="M 98,13 L 102,13 L 102,16 L 106,16 L 106,19 L 102,19 L 102,23 L 98,23 L 98,19 L 94,19 L 94,16 L 98,16 Z" fill="url(#favGold)"/>
+</svg>

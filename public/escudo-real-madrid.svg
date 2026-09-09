@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="100%" height="100%">
+  <defs>
+    <!-- Gradientes de Oro Real -->
+    <linearGradient id="rmGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE072"/>
+      <stop offset="30%" stop-color="#FEBE10"/>
+      <stop offset="70%" stop-color="#E5A608"/>
+      <stop offset="100%" stop-color="#B87D00"/>
+    </linearGradient>
+
+    <!-- Gradiente de Banda Morada Histórica -->
+    <linearGradient id="rmPurpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7336A8"/>
+      <stop offset="50%" stop-color="#582488"/>
+      <stop offset="100%" stop-color="#411669"/>
+    </linearGradient>
+
+    <!-- Gradiente para el aro blanco/marfil -->
+    <linearGradient id="rmWhiteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#EFF2F7"/>
+    </linearGradient>
+
+    <!-- Sombra suave para la corona y el cuerpo -->
+    <filter id="rmShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+
+    <!-- Clip path para contener la banda dentro del círculo interior -->
+    <clipPath id="innerCircleClip">
+      <circle cx="100" cy="148" r="68"/>
+    </clipPath>
+  </defs>
+
+  <!-- ==================== CÍRCULO PRINCIPAL DEL ESCUDO ==================== -->
+  <g filter="url(#rmShadow)">
+    <!-- Aro Exterior Dorado -->
+    <circle cx="100" cy="148" r="76" fill="url(#rmGoldGrad)" stroke="#8A5C00" stroke-width="1.5"/>
+    <!-- Aro Intermedio Blanco -->
+    <circle cx="100" cy="148" r="69" fill="url(#rmWhiteGrad)"/>
+
+    <!-- Elementos dentro del círculo (clip path) -->
+    <g clip-path="url(#innerCircleClip)">
+      <!-- Fondo marfil del interior -->
+      <circle cx="100" cy="148" r="68" fill="#FAF9F5"/>
+
+      <!-- Banda diagonal morada clásica del Real Madrid -->
+      <path d="M 25,95 L 125,225 L 175,225 L 75,95 Z" fill="url(#rmPurpleGrad)"/>
+
+      <!-- Líneas de realce de la banda morada -->
+      <line x1="25" y1="95" x2="125" y2="225" stroke="#8747C7" stroke-width="1.5" opacity="0.6"/>
+      <line x1="75" y1="95" x2="175" y2="225" stroke="#371059" stroke-width="1.5" opacity="0.6"/>
+
+      <!-- ==================== MONOGRAMA "MCF" ==================== -->
+      <!-- Letra C (Exterior) -->
+      <path d="M 128,105 C 80,92 58,118 58,148 C 58,178 80,204 128,191 C 120,183 118,179 116,173 C 86,182 73,168 73,148 C 73,128 86,114 116,123 Z"
+            fill="url(#rmGoldGrad)" stroke="#8A5C00" stroke-width="1.2"/>
+
+      <!-- Letra M (Madrid) -->
+      <path d="M 72,176 L 72,120 L 84,120 L 100,154 L 116,120 L 128,120 L 128,176 L 117,176 L 117,138 L 104,166 L 96,166 L 83,138 L 83,176 Z"
+            fill="url(#rmGoldGrad)" stroke="#8A5C00" stroke-width="1.2"/>
+
+      <!-- Letra F (Fútbol) central -->
+      <path d="M 94,185 L 94,115 L 114,115 L 114,124 L 104,124 L 104,142 L 112,142 L 112,150 L 104,150 L 104,185 Z"
+            fill="#FFFFFF" stroke="#8A5C00" stroke-width="1.2"/>
+    </g>
+
+    <!-- Borde interior dorado que da profundidad al marco -->
+    <circle cx="100" cy="148" r="68" fill="none" stroke="url(#rmGoldGrad)" stroke-width="2.5"/>
+    <circle cx="100" cy="148" r="70" fill="none" stroke="#785000" stroke-width="0.8"/>
+  </g>
+
+  <!-- ==================== CORONA REAL ESPAÑOLA ==================== -->
+  <g filter="url(#rmShadow)">
+    <!-- Base de la corona (Cintillo) -->
+    <path d="M 52,90 C 75,98 125,98 148,90 C 146,81 144,77 141,74 C 120,80 80,80 59,74 C 56,77 54,81 52,90 Z"
+          fill="url(#rmGoldGrad)" stroke="#8A5C00" stroke-width="1"/>
+
+    <!-- Piedras preciosas del cintillo -->
+    <ellipse cx="64" cy="83" rx="3.5" ry="2.2" fill="#D32F2F"/>
+    <ellipse cx="78" cy="85" rx="3.5" ry="2.2" fill="#1976D2"/>
+    <ellipse cx="100" cy="86" rx="4" ry="2.5" fill="#D32F2F"/>
+    <ellipse cx="122" cy="85" rx="3.5" ry="2.2" fill="#1976D2"/>
+    <ellipse cx="136" cy="83" rx="3.5" ry="2.2" fill="#D32F2F"/>
+
+    <!-- Terciopelo interior rojo de la corona -->
+    <path d="M 58,74 C 55,48 78,38 100,38 C 122,38 145,48 142,74 C 120,80 80,80 58,74 Z"
+          fill="#A81D24" stroke="#741117" stroke-width="1"/>
+
+    <!-- Diademas / Arcos dorados con perlas -->
+    <!-- Arco central -->
+    <path d="M 95,38 C 95,28 105,28 105,38 L 105,86 L 95,86 Z" fill="url(#rmGoldGrad)" opacity="0.85"/>
+    <!-- Arco izquierdo -->
+    <path d="M 58,74 C 58,45 80,32 98,30 L 98,38 C 82,40 68,52 68,76 Z" fill="url(#rmGoldGrad)"/>
+    <!-- Arco derecho -->
+    <path d="M 142,74 C 142,45 120,32 102,30 L 102,38 C 118,40 132,52 132,76 Z" fill="url(#rmGoldGrad)"/>
+
+    <!-- Florones de la corona (Flores de lis estilizadas) -->
+    <!-- Florón central -->
+    <path d="M 94,62 C 94,52 90,48 100,36 C 110,48 106,52 106,62 C 112,56 116,60 114,66 C 110,72 104,74 100,75 C 96,74 90,72 86,66 C 84,60 88,56 94,62 Z"
+          fill="url(#rmGoldGrad)" stroke="#8A5C00" stroke-width="0.8"/>
+
+    <!-- Florón izquierdo -->
+    <path d="M 66,70 C 66,62 62,58 70,48 C 78,58 74,62 74,70 C 80,65 83,69 81,74 C 77,78 72,80 70,80 C 68,80 63,78 59,74 C 57,69 60,65 66,70 Z"
+          fill="url(#rmGoldGrad)" stroke="#8A5C00" stroke-width="0.8"/>
+
+    <!-- Florón derecho -->
+    <path d="M 134,70 C 134,62 138,58 130,48 C 122,58 126,62 126,70 C 120,65 117,69 119,74 C 123,78 128,80 130,80 C 132,80 137,78 141,74 C 143,69 140,65 134,70 Z"
+          fill="url(#rmGoldGrad)" stroke="#8A5C00" stroke-width="0.8"/>
+
+    <!-- Orbe y Cruz en la cima -->
+    <circle cx="100" cy="24" r="5.5" fill="url(#rmGoldGrad)" stroke="#8A5C00" stroke-width="0.8"/>
+    <!-- Cruz superior -->
+    <path d="M 98,13 L 102,13 L 102,16 L 106,16 L 106,19 L 102,19 L 102,23 L 98,23 L 98,19 L 94,19 L 94,16 L 98,16 Z"
+          fill="url(#rmGoldGrad)" stroke="#8A5C00" stroke-width="0.5"/>
+
+    <!-- Perlas en las diademas -->
+    <circle cx="70" cy="46" r="2.2" fill="#FFFFFF" stroke="#C4A000" stroke-width="0.5"/>
+    <circle cx="80" cy="38" r="2.2" fill="#FFFFFF" stroke="#C4A000" stroke-width="0.5"/>
+    <circle cx="90" cy="33" r="2.2" fill="#FFFFFF" stroke="#C4A000" stroke-width="0.5"/>
+    <circle cx="110" cy="33" r="2.2" fill="#FFFFFF" stroke="#C4A000" stroke-width="0.5"/>
+    <circle cx="120" cy="38" r="2.2" fill="#FFFFFF" stroke="#C4A000" stroke-width="0.5"/>
+    <circle cx="130" cy="46" r="2.2" fill="#FFFFFF" stroke="#C4A000" stroke-width="0.5"/>
+  </g>
+</svg>

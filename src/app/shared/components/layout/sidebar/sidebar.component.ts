@@ -13,12 +13,12 @@ import { BrandingService } from '../../../../core/services/branding.service';
   template: `
       <aside class="sidebar" aria-label="Navegacion principal">
         <div class="brand-block">
-          <span class="brand-mark">
-            <span class="material-symbols-outlined">sports_soccer</span>
+          <span class="brand-mark" aria-hidden="true">
+            <img src="escudo-real-madrid.png" alt="Escudo Real Madrid" width="42" height="52" />
           </span>
           <div class="brand-copy">
             <strong>{{ branding.name() }}</strong>
-            <small>Panel administrativo</small>
+            <small>Reservas & Complejos</small>
           </div>
         </div>
 

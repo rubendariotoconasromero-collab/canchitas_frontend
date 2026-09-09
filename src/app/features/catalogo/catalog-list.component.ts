@@ -74,13 +74,16 @@ import { ConfirmationModalComponent } from '../../shared/components/confirmation
     </app-list-shell>
     @if (opened()) {
     <app-modal [open]="opened()" [title]="(editingId() ? 'Editar: ' : 'Nuevo: ') + config().title" size="wide" [busy]="saving()" (closed)="opened.set(false)">
-      <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <form [formGroup]="form" (ngSubmit)="save()" [attr.data-catalog]="config().endpoint" novalidate>
         <div class="modal-body">
           @if (error()) {<div class="alert alert-danger" role="alert">{{error()}}</div>}
           <div class="catalog-form-grid">
             @for (field of config().fields; track field.key) {
               @if (fixed()[field.key] === undefined) {
-                <div [class.wide]="field.type === 'textarea' || field.type === 'file'">
+                @if (field.sectionBefore) {
+                  <div class="catalog-form-section"><span>{{field.sectionBefore}}</span></div>
+                }
+                <div class="catalog-form-field" [class.wide]="field.type === 'textarea' || field.type === 'file'" [class.checkbox-option]="field.type === 'checkbox'">
                   @switch (field.type) {
                     @case ('checkbox') {<app-checkbox [label]="field.label" [formControlName]="field.key" />}
                     @case ('textarea') {<app-textarea [label]="field.label" [formControlName]="field.key" />}

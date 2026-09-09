@@ -21,20 +21,20 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 
         <div class="auth-showcase-body">
           <div class="auth-brand-badge">
-            <div class="brand-mark auth-logo-mark">
-              <span class="material-symbols-outlined">sports_soccer</span>
+            <div class="brand-mark auth-logo-mark" aria-hidden="true">
+              <img src="escudo-real-madrid.png" alt="Escudo Real Madrid" width="56" height="56" />
             </div>
             <div class="auth-brand-text">
               <span class="auth-brand-title">{{ branding.name() }}</span>
-              <span class="auth-brand-tagline">Gestión de Complejos Deportivos</span>
+              <span class="auth-brand-tagline">Gestión de Reservas & Espacios Deportivos</span>
             </div>
           </div>
 
           <div class="auth-showcase-hero">
-            <h2>El control total de tus canchas en un solo lugar.</h2>
+            <h2>Gestión de reservas y alquiler de espacios deportivos.</h2>
             <p>
-              Optimiza alquileres, turnos, horarios y la administración de tu equipo
-              con la máxima fluidez, estabilidad y seguridad.
+              Control total de disponibilidad de canchas, turnos, horarios y administración
+              con la excelencia y prestigio de Soccer Real Madrid.
             </p>
           </div>
 
@@ -87,12 +87,12 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
       <div class="auth-form-container">
         <!-- Marca visible solo en dispositivos móviles -->
         <div class="auth-mobile-brand">
-          <div class="brand-mark auth-logo-mark">
-            <span class="material-symbols-outlined">sports_soccer</span>
+          <div class="brand-mark auth-logo-mark" aria-hidden="true">
+            <img src="escudo-real-madrid.png" alt="Escudo Real Madrid" width="46" height="46" />
           </div>
           <div>
             <strong>{{ branding.name() }}</strong>
-            <small>Gestión Deportiva</small>
+            <small>Complejo Deportivo & Reservas</small>
           </div>
         </div>
 
@@ -168,7 +168,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
         <div class="auth-form-footer">
           <div class="auth-security-legend">
             <span class="material-symbols-outlined">verified_user</span>
-            <span>Acceso restringido únicamente a usuarios autorizados</span>
+            <span>Soccer Real Madrid • Plataforma de Administración Segura</span>
           </div>
         </div>
       </div>
@@ -200,7 +200,12 @@ export class LoginComponent {
     this.auth.login(this.form.value.correo ?? '', this.form.value.password ?? '').subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: (err) => {
-        this.error.set(err?.error?.detail ?? err?.error?.correo?.[0] ?? 'No se pudo iniciar sesion.');
+        this.error.set(
+          err?.error?.detail ??
+          err?.error?.correo?.[0] ??
+          err?.error?.message ??
+          (err?.status === 0 ? 'No se pudo conectar con el servidor backend en http://127.0.0.1:8000.' : 'No se pudo iniciar sesión.')
+        );
         this.loading.set(false);
       },
     });
