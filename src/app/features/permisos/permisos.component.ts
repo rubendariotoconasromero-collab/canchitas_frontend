@@ -11,12 +11,13 @@ import { SnackbarService } from '../../core/services/snackbar.service';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
+import { DropdownComponent, DropdownItemComponent } from '../../shared/components/dropdown';
 import { PermisoPayload, PermisoService } from './permiso.service';
 
 @Component({
   selector: 'app-permisos',
   standalone: true,
-  imports: [CanDirective, PageHeaderComponent, ListToolbarComponent, ListShellComponent, AccessFormModalComponent, ButtonComponent, BadgeComponent, ConfirmationModalComponent],
+  imports: [CanDirective, PageHeaderComponent, ListToolbarComponent, ListShellComponent, AccessFormModalComponent, ButtonComponent, BadgeComponent, ConfirmationModalComponent, DropdownComponent, DropdownItemComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
@@ -26,7 +27,7 @@ import { PermisoPayload, PermisoService } from './permiso.service';
       </app-page-header>
 
       <app-list-toolbar searchLabel="Buscar permiso" entity="permisos"
-        [total]="permisos().length" [active]="activos()" [(query)]="query" />
+        [total]="permisos().length" [active]="activos()" [(query)]="query" [showRefresh]="true" [loading]="loading()" (refreshed)="load()" />
 
       <app-list-shell class="permisos-list" [loading]="loading()" [error]="loadError()"
         [empty]="filteredPermisos().length === 0" (retry)="load()">
@@ -45,15 +46,21 @@ import { PermisoPayload, PermisoService } from './permiso.service';
               <div class="list-col hide-sm list-col-muted">{{ permiso.descripcion || 'Sin descripcion' }}</div>
               <div class="list-col center-col"><app-badge [active]="permiso.estado" /></div>
               <div class="list-col list-col-actions">
-                <app-button *appCan="'permisos.editar'; global: true" size="sm" variant="outline-secondary" icon="edit" title="Editar" (clicked)="openEdit(permiso)" />
-                <app-button
-                  size="sm"
-                  [variant]="permiso.estado ? 'outline-danger' : 'outline-primary'"
-                  *appCan="'permisos.cambiar_estado'; global: true"
-                  [icon]="permiso.estado ? 'toggle_off' : 'toggle_on'"
-                  [title]="permiso.estado ? 'Desactivar' : 'Activar'"
-                  (clicked)="confirmToggle(permiso)"
-                />
+                <app-dropdown align="end" [title]="'Acciones para ' + permiso.nombre">
+                  <app-dropdown-item
+                    *appCan="'permisos.editar'; global: true"
+                    icon="edit"
+                    label="Editar permiso"
+                    (clicked)="openEdit(permiso)"
+                  />
+                  <app-dropdown-item
+                    *appCan="'permisos.cambiar_estado'; global: true"
+                    [icon]="permiso.estado ? 'toggle_off' : 'toggle_on'"
+                    [label]="permiso.estado ? 'Desactivar permiso' : 'Activar permiso'"
+                    [danger]="permiso.estado"
+                    (clicked)="confirmToggle(permiso)"
+                  />
+                </app-dropdown>
               </div>
             </div>
           }

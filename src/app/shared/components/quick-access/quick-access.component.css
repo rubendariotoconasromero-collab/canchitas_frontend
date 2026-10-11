@@ -7,6 +7,7 @@
   padding: 14px;
   border: 1px solid var(--container-border-color);
   border-radius: var(--border-radius);
+  background: var(--bg-surface);
   color: var(--text-700);
   text-decoration: none;
   transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
@@ -14,8 +15,7 @@
 
 .quick-access-item:hover {
   border-color: var(--accent);
-  background: var(--primary-lighter);
-  transform: translateY(-1px);
+  background: var(--rm-gold-light);
 }
 
 .quick-access-icon {
@@ -24,8 +24,8 @@
   height: 38px;
   place-items: center;
   border-radius: var(--border-radius);
-  background: var(--primary-lighter);
-  color: var(--primary);
+  background: var(--rm-gold-light);
+  color: var(--rm-navy);
 }
 
 .quick-access-copy {

@@ -6,10 +6,11 @@ import { AuthService } from '../../../core/services/auth.service';
 import { BrandingService } from '../../../core/services/branding.service';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, InputComponent, ButtonComponent],
+  imports: [ReactiveFormsModule, InputComponent, ButtonComponent, BadgeComponent],
   template: `
     <div class="login-card-master">
       <!-- Identidad del negocio -->
@@ -71,14 +72,8 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
           </div>
 
           <div class="auth-showcase-footer">
-            <div class="auth-status-chip">
-              <span class="auth-status-dot"></span>
-              <span>Sistema Operativo v1.0</span>
-            </div>
-            <span class="auth-ssl-badge">
-              <span class="material-symbols-outlined">lock</span>
-              Cifrado Seguro
-            </span>
+            <app-badge label="Sistema Operativo v1.0" tone="success" icon="" />
+            <app-badge label="Cifrado Seguro" tone="neutral" icon="lock" />
           </div>
         </div>
       </div>
@@ -97,10 +92,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
         </div>
 
         <div class="auth-form-header">
-          <div class="auth-role-pill">
-            <span class="material-symbols-outlined">shield</span>
-            <span>Acceso Seguro</span>
-          </div>
+          <div class="auth-access-label"><app-badge label="Acceso Seguro" tone="info" icon="shield" /></div>
           <h1 class="auth-form-title">Iniciar Sesión</h1>
           <p class="auth-form-desc">Ingresa con tus credenciales para acceder al panel administrativo.</p>
         </div>
@@ -185,8 +177,8 @@ export class LoginComponent {
   readonly error = signal('');
 
   readonly form = this.fb.nonNullable.group({
-    correo: ['admin@canchitas.com', [Validators.required, Validators.email]],
-    password: ['Admin@1234', [Validators.required]],
+    correo: ['admin@gmail.com', [Validators.required, Validators.email]],
+    password: ['password', [Validators.required]],
   });
 
   submit(): void {

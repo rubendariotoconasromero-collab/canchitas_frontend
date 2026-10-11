@@ -5,6 +5,7 @@
   border-radius: var(--border-radius-lg);
   background: var(--bg-surface);
   box-shadow: var(--shadow-lg);
+  color: var(--text-700);
 }
 
 .app-modal-wide {
@@ -21,12 +22,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.5rem;
   background: var(--bg-elevated);
 }
 
 .modal-header {
   border-bottom: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  border-top: 3px solid var(--accent);
 }
 
 .modal-footer {
@@ -40,11 +43,19 @@
   gap: 0.5rem;
   margin: 0;
   color: var(--typography-color);
-  font-size: var(--text-lg);
+  font-size: 1rem;
   font-weight: var(--font-semi-bold);
 }
 
 .modal-body {
-  padding: 1.25rem;
+  padding: 1.5rem;
   background: var(--bg-surface);
+}
+
+.app-modal .modal-title .material-symbols-outlined { color: var(--accent-dark); }
+.app-modal .form-control, .app-modal .form-select { min-height: 42px; font-size: 14px; }
+.app-modal .form-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.app-modal .modal-footer { position: sticky; bottom: 0; z-index: 1; }
+@media (max-width: 560px) {
+  .app-modal .modal-header, .app-modal .modal-body, .app-modal .modal-footer { padding: 16px; }
 }

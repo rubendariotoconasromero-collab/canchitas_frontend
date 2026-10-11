@@ -1,26 +1,37 @@
 .badge-estado {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.22rem 0.65rem;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
   border-radius: 999px;
-  font-size: var(--text-xs);
+  font-size: 12px;
   font-weight: var(--font-semi-bold);
-  white-space: nowrap;
+  line-height: 1.4;
+  max-width: 100%;
+  vertical-align: middle;
 }
+.badge-estado .badge-label { white-space: normal; overflow-wrap: anywhere; }
 
 .badge-estado .material-symbols-outlined {
-  font-size: 0.9rem;
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  line-height: 1;
+  flex: 0 0 15px;
 }
 
-.badge-activo {
+.badge-tone-success {
   border: 1px solid var(--alert-success-border-color);
   background: var(--alert-success-bg-color);
   color: var(--alert-success-color);
 }
 
-.badge-inactivo {
-  border: 1px solid var(--alert-error-border-color);
-  background: var(--alert-error-bg-color);
-  color: var(--alert-error-color);
+.badge-tone-neutral {
+  border: 1px solid var(--border-color);
+  background: #f2f4f7;
+  color: var(--text-500);
 }
+.badge-tone-warning { border-color: #ead28d; background: #fff5d6; color: #74570c; }
+.badge-tone-danger { border-color: #edbfc4; background: #fcebee; color: #a12f3b; }
+.badge-tone-info { border-color: #bdd4ed; background: #edf4fc; color: #285782; }

@@ -1,5 +1,7 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0');
+@import './styles/admin-design.css';
+@import './styles/receipt-print.css';
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
   /* =========================================================
@@ -24,24 +26,24 @@
   --gold-surface: #febe10;
   --on-gold: #08162b;
   --accent-dark: #d49c09;
-  --bg-page: #f4f6fa;
+  --bg-page: #f5f6f8;
   --bg-surface: #ffffff;
   --bg-elevated: #fbfcfe;
   --text-300: #9daec2;
-  --text-400: #6b7f96;
-  --text-500: #495e77;
-  --text-600: #334458;
-  --text-700: #1b2d45;
+  --text-400: #667085;
+  --text-500: #596273;
+  --text-600: #404957;
+  --text-700: #252c37;
   --text-800: #0c2340;
   --typography-color: #0c2340;
   --border-color: #dce3ed;
   --container-border-color: #e5ebf4;
-  --input-field-focus-color: #114297;
-  --focus-ring: rgba(17, 66, 151, 0.2);
-  --hover-bg: #edf3fa;
-  --button-primary-color: #0c2340;
-  --button-primary-hover-color: #114297;
-  --button-primary-text: #ffffff;
+  --input-field-focus-color: #d49c09;
+  --focus-ring: rgba(254, 190, 16, 0.22);
+  --hover-bg: #fafbfc;
+  --button-primary-color: #febe10;
+  --button-primary-hover-color: #e8ac08;
+  --button-primary-text: #08162b;
   --button-danger-color: #b42318;
   --button-danger-hover-color: #8f1d14;
   --button-danger-text: #ffffff;
@@ -65,7 +67,7 @@
   --sidebar-item-hover-bg: rgba(255, 255, 255, 0.08);
   --sidebar-item-active-bg: rgba(17, 66, 151, 0.45);
   --border-radius: 8px;
-  --border-radius-lg: 12px;
+  --border-radius-lg: 8px;
   --shadow-sm: 0 1px 2px rgba(12, 35, 64, 0.08);
   --shadow-lg: 0 14px 38px rgba(12, 35, 64, 0.16);
   --shadow-card: 0 1px 3px rgba(12, 35, 64, 0.06), 0 1px 2px rgba(12, 35, 64, 0.04);
@@ -73,7 +75,7 @@
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.125rem;
-  --text-xl: 1.35rem;
+  --text-xl: 1.5rem;
   --font-medium: 500;
   --font-semi-bold: 650;
   --font-bold: 750;
@@ -88,12 +90,22 @@ body {
   margin: 0;
   color: var(--typography-color);
   background: var(--bg-page);
-  font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family: "Space Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
 .material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: 400;
+  font-style: normal;
   font-size: 1.15rem;
   line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
   vertical-align: middle;
 }
 
@@ -414,6 +426,7 @@ body {
 .auth-form-header {
   margin-bottom: 20px;
 }
+.auth-access-label { margin-bottom: 12px; }
 
 .auth-role-pill {
   display: inline-flex;
@@ -1017,14 +1030,14 @@ body {
   flex: 0 0 auto;
   border-color: var(--accent);
   background: var(--accent);
-  color: #08162b;
+  color: var(--button-primary-text);
   font-weight: var(--font-bold);
 }
 
 .dashboard-welcome .btn-primary:hover {
   background: #ffffff;
   border-color: #ffffff;
-  color: #0c2340;
+  color: var(--button-primary-text);
 }
 
 /* Contraste y legibilidad de textos en superficies oscuras y claras */
@@ -1107,17 +1120,17 @@ body {
 
 .usuarios-list .list-header,
 .usuarios-list .list-row {
-  grid-template-columns: 60px 1.65fr 2fr 1.15fr 110px 150px;
+  grid-template-columns: 60px 1.7fr 2fr 1.2fr 110px 132px;
 }
 
 .roles-list .list-header,
 .roles-list .list-row {
-  grid-template-columns: 60px 1.4fr 2fr 100px 110px 150px;
+  grid-template-columns: 60px 1.5fr 2fr 100px 110px 132px;
 }
 
 .permisos-list .list-header,
 .permisos-list .list-row {
-  grid-template-columns: 60px 1.5fr 2.2fr 110px 110px;
+  grid-template-columns: 60px 1.5fr 2.2fr 110px 132px;
 }
 
 .user-cell {
@@ -1420,9 +1433,9 @@ body {
 
 }
 /* The scroll container stays within the viewport; only table rows keep their width. */
-.usuarios-list .list-header, .usuarios-list .list-row { min-width: 880px; }
-.roles-list .list-header, .roles-list .list-row { min-width: 800px; }
-.permisos-list .list-header, .permisos-list .list-row { min-width: 690px; }
+.usuarios-list .list-header, .usuarios-list .list-row { min-width: 800px; }
+.roles-list .list-header, .roles-list .list-row { min-width: 720px; }
+.permisos-list .list-header, .permisos-list .list-row { min-width: 640px; }
 app-metric-card, app-quick-access { display: block; min-width: 0; }
 body:has(dialog[open]) .content-area { overflow: hidden; }
 body:has(dialog[open]) { overflow: hidden; }

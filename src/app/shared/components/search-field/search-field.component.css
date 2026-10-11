@@ -2,13 +2,16 @@
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  width: min(380px, 100%);
+  width: 100%;
+  min-height: 42px;
   padding: 0.5rem 0.7rem;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  background: var(--bg-elevated);
+  background: var(--bg-surface);
   color: var(--text-500);
 }
+
+.search-field:focus-within { border-color: var(--input-field-focus-color); box-shadow: 0 0 0 3px var(--focus-ring); }
 
 .search-field input {
   width: 100%;

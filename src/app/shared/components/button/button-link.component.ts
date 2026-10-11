@@ -9,7 +9,7 @@ import { ButtonVariant } from './button.component';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <a [routerLink]="route()" [class]="'btn btn-' + variant()">
+    <a [routerLink]="route()" [queryParams]="queryParams()" [class]="'btn btn-' + variant()">
       @if (icon()) { <span class="material-symbols-outlined" aria-hidden="true">{{ icon() }}</span> }
       <ng-content />
     </a>
@@ -19,4 +19,5 @@ export class ButtonLinkComponent {
   readonly route = input.required<string>();
   readonly icon = input('');
   readonly variant = input<ButtonVariant>('primary');
+  readonly queryParams = input<Record<string, string> | null>(null);
 }

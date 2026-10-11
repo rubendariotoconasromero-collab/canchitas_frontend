@@ -1,9 +1,11 @@
 .list-container {
-  overflow: hidden;
+  overflow-x: auto;
   border: 1px solid var(--container-border-color);
   border-radius: var(--border-radius-lg);
   background: var(--bg-surface);
 }
+
+.business-shell .list-container { border: 0; border-radius: 0; background: transparent; }
 
 .list-header,
 .list-row {
@@ -14,24 +16,24 @@
 }
 
 .list-header {
-  background: var(--primary-lighter);
-  border-bottom: 2px solid var(--border-color);
-  padding-top: 0.72rem;
-  padding-bottom: 0.72rem;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-color);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .list-header .list-col {
-  color: var(--primary);
-  font-size: 0.68rem;
+  color: var(--text-500);
+  font-size: 0.75rem;
   font-weight: var(--font-bold);
-  letter-spacing: 0.07em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .list-row {
-  min-height: 58px;
-  padding-top: 0.55rem;
-  padding-bottom: 0.55rem;
+  min-height: 64px;
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
   border-bottom: 1px solid var(--container-border-color);
   transition: background-color 0.12s ease;
 }
@@ -67,9 +69,17 @@
   justify-self: center;
 }
 
+.list-col.list-col-actions,
 .list-col-actions {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
+  overflow: visible;
+  position: relative;
+}
+
+.list-row:has(.app-dropdown.is-open) {
+  position: relative;
+  z-index: 20;
 }

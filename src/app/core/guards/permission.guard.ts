@@ -8,8 +8,11 @@ export const permissionGuard: CanActivateChildFn = route => {
   const router = inject(Router);
   return auth.me().pipe(
     map(() => {
-      if (!route.data['permission'] || auth.can(route.data['permission'])) return true;
+      if (!route.data['permission'] || auth.can(route.data['permission'], !!route.data['global'])) return true;
       if (route.data['permission'] === 'dashboard.ver') {
+        if (auth.can('reservas.ver')) return router.createUrlTree(['/agenda']);
+        if (auth.can('caja.ver')) return router.createUrlTree(['/caja']);
+        if (auth.can('clientes.ver')) return router.createUrlTree(['/clientes']);
         const first = ['usuarios', 'roles', 'permisos', 'canchas', 'deportes', 'sucursales', 'politicas', 'negocio'].find(resource => auth.can(resource + '.ver'));
         if (first) return router.createUrlTree(['/' + first]);
       }

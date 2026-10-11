@@ -1,0 +1,39 @@
+:host { display: block; min-width: 0; }
+.agenda-period { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px 0 4px; }
+.agenda-period-navigation,.agenda-period-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.agenda-period h3 { font-size: 15px; font-weight: 600; color: var(--text-700); margin: 0 6px; overflow-wrap: anywhere; }
+.agenda-period .segmented { height: 34px; border-color: var(--container-border-color); }
+.agenda-period .segmented button { font: inherit; font-size: 13px; padding: 0 16px; background: var(--bg-surface); color: var(--text-600); }
+.agenda-period .segmented button.selected { background: var(--accent); color: var(--on-gold); font-weight: 600; }
+.agenda-period .segmented button:focus-visible { outline: 2px solid var(--accent-dark); outline-offset: -3px; }
+.calendar-status { margin: 12px 0 0; color: var(--text-500); font-size: 13px; }
+.agenda-section { margin-top: 22px; min-width: 0; }
+.agenda-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+.agenda-section-heading > div,.agenda-section-heading h3 { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.agenda-section-heading h3 { font-size: 15px; font-weight: 600; margin: 0; color: var(--text-700); }
+.agenda-section-heading span,.agenda-section-heading small { color: var(--text-500); font-size: 12px; overflow-wrap: anywhere; }
+.agenda-section-heading h3 .material-symbols-outlined { font-size: 18px; color: var(--accent-dark); }
+.agenda-table { width: 100%; margin: 0; font-size: 14px; }
+.agenda-table th { background: var(--bg-elevated); color: var(--text-500); text-transform: uppercase; font-size: 12px; font-weight: 600; }
+.agenda-table th,.agenda-table td { padding: 14px 16px; vertical-align: middle; border-color: var(--container-border-color); }
+.agenda-table td { color: var(--text-700); }
+.agenda-table tbody tr:last-child td { border-bottom: 0; }
+.agenda-table tbody tr:hover td { background: var(--hover-bg); }
+.agenda-table strong { font-weight: 600; }
+.agenda-table small { display: block; font-size: 12px; color: var(--text-500); margin-top: 4px; }
+.agenda-table td.name-cell { white-space: normal; min-width: 150px; max-width: 300px; overflow-wrap: anywhere; }
+.agenda-table .amount-cell { text-align: right; font-variant-numeric: tabular-nums; }
+.agenda-table .action-cell { text-align: center; width: 90px; }
+.availability-table { table-layout: fixed; }
+.availability-table th:first-child { width: 34%; }
+.availability-table td { white-space: normal; }
+.court-identity { display: flex; align-items: center; gap: 12px; overflow-wrap: anywhere; }
+.court-identity .material-symbols-outlined { flex: 0 0 auto; font-size: 22px; color: var(--accent-dark); }
+.slots-cell summary { font-size: 13px; color: #246046; cursor: pointer; }
+.agenda-slots { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.agenda-slot { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; border: 1px solid #d2e5da; border-radius: 4px; background: #f1f8f4; color: #24553d; font-size: 12px; font-variant-numeric: tabular-nums; }
+.agenda-slot .material-symbols-outlined { font-size: 16px; }
+.availability-status { display: inline-flex; align-items: center; gap: 7px; color: var(--text-500); font-size: 13px; }
+.availability-status .material-symbols-outlined { font-size: 17px; }
+.availability-status.off { color: var(--text-400); }
+@media(max-width:600px) { .agenda-period-navigation h3 { flex: 1; font-size: 14px; } .agenda-period-tools { width: 100%; justify-content: space-between; } .agenda-section-heading { align-items: flex-start; } .availability-table th:first-child { width: 44%; } .agenda-table td,.agenda-table th { padding: 12px; } .court-identity { gap: 6px; } .court-identity .material-symbols-outlined { display: none; } }

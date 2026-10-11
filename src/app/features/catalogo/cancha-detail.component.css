@@ -1,0 +1,25 @@
+.court-heading .court-summary {
+  align-items: center;
+  gap: 12px 24px;
+  margin: 12px 0 20px;
+  color: var(--text-600);
+  font-size: 14px;
+}
+.court-summary > span { display: inline-flex; align-items: center; gap: 6px; }
+.court-summary .material-symbols-outlined { font-size: 18px; color: var(--text-500); }
+.court-publication-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.court-publication-alert > .material-symbols-outlined { flex: 0 0 20px; font-size: 20px; margin-top: 1px; }
+.court-publication-alert ul { min-width: 0; margin: 0; padding-left: 18px; overflow-wrap: anywhere; }
+.court-publication-alert li + li { margin-top: 4px; }
+@media (max-width: 560px) {
+  .court-heading .court-summary { gap: 10px 16px; }
+  .court-publication-alert { padding: 12px; gap: 8px; }
+}

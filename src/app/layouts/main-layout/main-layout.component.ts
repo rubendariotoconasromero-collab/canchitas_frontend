@@ -3,17 +3,18 @@ import { TopbarComponent } from '../../shared/components/layout/topbar/topbar.co
 import { StorageService } from '../../core/services/storage.service';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { filter, interval, exhaustMap, catchError, EMPTY, fromEvent, merge } from 'rxjs';
+import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { AuthService } from '../../core/services/auth.service';
+import { PageNavigationService } from '../../core/services/page-navigation.service';
 import { SnackbarComponent } from '../../shared/components/snackbar/snackbar.component';
 
 @Component({
   selector: 'app-main-layout',
   imports: [RouterOutlet, SidebarComponent, TopbarComponent, SnackbarComponent],
   template: `
-    <div class="app-shell" [class.sidebar-open]="menuOpen()">
+    <div class="app-shell" [class.sidebar-open]="menuOpen()" [class.sidebar-compact]="sidebarCompact()" (keydown.escape)="closeMenu()">
       <button
         type="button"
         class="sidebar-backdrop"
@@ -21,10 +22,12 @@ import { SnackbarComponent } from '../../shared/components/snackbar/snackbar.com
         (click)="closeMenu()"
       ></button>
 
-      <app-sidebar [userName]="userName" [userEmail]="userEmail" (navigated)="closeMenu()" (signedOut)="logout()" />
+      <app-sidebar [userName]="userName" [userEmail]="userEmail" [compact]="sidebarCompact()"
+        (expandRequested)="sidebarCompact.set(false)" (navigated)="closeMenu()" (signedOut)="logout()" />
 
       <section class="workspace">
-        <app-topbar [title]="pageTitle()" [userName]="userName" (menuRequested)="menuOpen.set(true)" />
+        <app-topbar [title]="pageTitle()" [userName]="userName" [compact]="sidebarCompact()" [menuOpen]="menuOpen()"
+          (compactRequested)="sidebarCompact.set(!sidebarCompact())" (menuRequested)="menuOpen.set(!menuOpen())" />
 
         <main class="content-area">
           <router-outlet />
@@ -41,16 +44,11 @@ export class MainLayoutComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly menuOpen = signal(false);
+  readonly sidebarCompact = signal(false);
   readonly pageTitle = signal(this.resolvePageTitle(this.router.url));
 
   constructor() {
-    merge(interval(30000), fromEvent(window, 'focus')).pipe(
-      exhaustMap(() => this.auth.me().pipe(catchError(() => EMPTY))),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(() => {
-      const permission = this.router.routerState.snapshot.root.firstChild?.firstChild?.data['permission'];
-      if (permission && !this.auth.can(permission)) this.router.navigate(['/sin-acceso']);
-    });
+    inject(PageNavigationService);
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -91,6 +89,8 @@ export class MainLayoutComponent {
   private resolvePageTitle(url: string): string {
     const segment = url.split('?')[0].split('/').filter(Boolean)[0] ?? 'dashboard';
     const titles: Record<string, string> = {
+      agenda: 'Agenda de reservas', clientes: 'Clientes',
+      caja: 'Caja', 'administracion-cajas': 'Administracion de cajas',
       canchas: 'Espacios deportivos', deportes: 'Deportes', negocio: 'Negocio',
       sucursales: 'Sucursales', politicas: 'Politicas de reserva',
       dashboard: 'Resumen general',

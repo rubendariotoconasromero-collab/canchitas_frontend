@@ -1,0 +1,6 @@
+@media print {
+  body:has(#cash-print-receipt) * { visibility: hidden; }
+  body:has(#cash-print-receipt) #cash-print-receipt,
+  body:has(#cash-print-receipt) #cash-print-receipt * { visibility: visible; }
+  body:has(#cash-print-receipt) #cash-print-receipt { position: fixed; inset: 0 auto auto 0; width: 100%; max-width: 100%; margin: 0; padding: 16px; background: white; color: black; }
+}

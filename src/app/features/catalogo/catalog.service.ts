@@ -21,4 +21,7 @@ export class CatalogService {
     }));
   }
   deactivate(endpoint: string, id: number) { return this.http.delete(this.url(endpoint,id)); }
+  movePhoto(id: number, direction: 'subir' | 'bajar') {
+    return this.http.post<CatalogRow[]>(`${this.url('fotos', id)}mover/`, {direccion: direction});
+  }
 }

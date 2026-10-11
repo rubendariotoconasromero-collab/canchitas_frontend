@@ -60,6 +60,9 @@ export type InputType = 'text' | 'email' | 'password' | 'number' | 'date' | 'tim
           [attr.aria-describedby]="errorMessage() || hint() ? id + '-help' : null"
         [class.is-invalid]="!!errorMessage() || invalid()"
         [type]="type()"
+        [attr.step]="type() === 'number' ? step() : null"
+        [attr.min]="type() === 'number' ? min() : null"
+        [attr.max]="type() === 'number' ? max() : null"
         [placeholder]="placeholder()"
         [disabled]="_disabled()"
         [value]="_value()"
@@ -86,6 +89,9 @@ export class InputComponent implements ControlValueAccessor {
   invalid = input(false);
   required = input(false);
   hint = input('');
+  step = input<number | null>(null);
+  min = input<number | null>(null);
+  max = input<number | null>(null);
 
   _value = signal('');
   _disabled = signal(false);

@@ -12,6 +12,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { UsuarioAsignacionesModalComponent } from './components/usuario-asignaciones-modal.component';
 import { UsuarioFormData, UsuarioModalComponent } from './components/usuario-modal.component';
+import { DropdownComponent, DropdownItemComponent } from '../../shared/components/dropdown';
 import { UsuarioPayload, UsuarioService } from './usuario.service';
 
 @Component({
@@ -23,6 +24,8 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
     ConfirmationModalComponent,
     UsuarioModalComponent,
     UsuarioAsignacionesModalComponent,
+    DropdownComponent,
+    DropdownItemComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -33,7 +36,7 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
       </app-page-header>
 
       <app-list-toolbar searchLabel="Buscar usuario" entity="usuarios"
-        [total]="usuarios().length" [active]="activos()" [(query)]="query" />
+        [total]="usuarios().length" [active]="activos()" [(query)]="query" [showRefresh]="true" [loading]="loading()" (refreshed)="load()" />
 
       <app-list-shell class="usuarios-list" [loading]="loading()" [error]="loadError()"
         [empty]="filteredUsuarios().length === 0" (retry)="load()">
@@ -64,31 +67,28 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
                 <app-badge [active]="usuario.estado" />
               </div>
               <div class="list-col list-col-actions">
-                <app-button
-                  size="sm"
-                  variant="outline-primary"
-                  icon="admin_panel_settings"
-                  title="Accesos"
-                  *appCan="'usuarios.asignar_accesos'"
-                  [disabled]="usuario.id === auth.currentUser()?.id"
-                  (clicked)="openAsignaciones(usuario)"
-                />
-                <app-button
-                  size="sm"
-                  variant="outline-secondary"
-                  icon="edit"
-                  title="Editar"
-                  *appCan="'usuarios.editar'"
-                  (clicked)="openEdit(usuario)"
-                />
-                <app-button
-                  size="sm"
-                  [variant]="usuario.estado ? 'outline-danger' : 'outline-primary'"
-                  *appCan="'usuarios.cambiar_estado'"
-                  [icon]="usuario.estado ? 'toggle_off' : 'toggle_on'"
-                  [title]="usuario.estado ? 'Desactivar' : 'Activar'"
-                  (clicked)="confirmToggle(usuario)"
-                />
+                <app-dropdown align="end" [title]="'Acciones para ' + usuario.nombre">
+                  <app-dropdown-item
+                    *appCan="'usuarios.asignar_accesos'"
+                    icon="admin_panel_settings"
+                    label="Gestionar accesos"
+                    [disabled]="usuario.id === auth.currentUser()?.id"
+                    (clicked)="openAsignaciones(usuario)"
+                  />
+                  <app-dropdown-item
+                    *appCan="'usuarios.editar'"
+                    icon="edit"
+                    label="Editar usuario"
+                    (clicked)="openEdit(usuario)"
+                  />
+                  <app-dropdown-item
+                    *appCan="'usuarios.cambiar_estado'"
+                    [icon]="usuario.estado ? 'toggle_off' : 'toggle_on'"
+                    [label]="usuario.estado ? 'Desactivar usuario' : 'Activar usuario'"
+                    [danger]="usuario.estado"
+                    (clicked)="confirmToggle(usuario)"
+                  />
+                </app-dropdown>
               </div>
             </div>
           }

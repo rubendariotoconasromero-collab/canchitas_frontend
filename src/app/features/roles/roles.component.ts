@@ -13,12 +13,13 @@ import { SnackbarService } from '../../core/services/snackbar.service';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
+import { DropdownComponent, DropdownItemComponent } from '../../shared/components/dropdown';
 import { RolPayload, RolService } from './rol.service';
 
 @Component({
   selector: 'app-roles',
   standalone: true,
-  imports: [CanDirective, PageHeaderComponent, ListToolbarComponent, ListShellComponent, ModalComponent, CheckboxComponent, AccessFormModalComponent, ButtonComponent, BadgeComponent, ConfirmationModalComponent],
+  imports: [CanDirective, PageHeaderComponent, ListToolbarComponent, ListShellComponent, ModalComponent, CheckboxComponent, AccessFormModalComponent, ButtonComponent, BadgeComponent, ConfirmationModalComponent, DropdownComponent, DropdownItemComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
@@ -28,7 +29,7 @@ import { RolPayload, RolService } from './rol.service';
       </app-page-header>
 
       <app-list-toolbar searchLabel="Buscar rol" entity="roles"
-        [total]="roles().length" [active]="activos()" [(query)]="query" />
+        [total]="roles().length" [active]="activos()" [(query)]="query" [showRefresh]="true" [loading]="loading()" (refreshed)="load()" />
 
       <app-list-shell class="roles-list" [loading]="loading()" [error]="loadError()"
         [empty]="filteredRoles().length === 0" (retry)="load()">
@@ -49,16 +50,27 @@ import { RolPayload, RolService } from './rol.service';
               <div class="list-col center-col">{{ rol.permisos?.length ?? 0 }}</div>
               <div class="list-col center-col"><app-badge [active]="rol.estado" /></div>
               <div class="list-col list-col-actions">
-                <app-button *appCan="'roles.asignar_permisos'; global: true" size="sm" variant="outline-primary" icon="rule" title="Permisos" (clicked)="openPermisos(rol)" />
-                <app-button *appCan="'roles.editar'; global: true" size="sm" variant="outline-secondary" icon="edit" title="Editar" (clicked)="openEdit(rol)" />
-                <app-button
-                  size="sm"
-                  [variant]="rol.estado ? 'outline-danger' : 'outline-primary'"
-                  *appCan="'roles.cambiar_estado'; global: true"
-                  [icon]="rol.estado ? 'toggle_off' : 'toggle_on'"
-                  [title]="rol.estado ? 'Desactivar' : 'Activar'"
-                  (clicked)="confirmToggle(rol)"
-                />
+                <app-dropdown align="end" [title]="'Acciones para ' + rol.nombre">
+                  <app-dropdown-item
+                    *appCan="'roles.asignar_permisos'; global: true"
+                    icon="rule"
+                    label="Asignar permisos"
+                    (clicked)="openPermisos(rol)"
+                  />
+                  <app-dropdown-item
+                    *appCan="'roles.editar'; global: true"
+                    icon="edit"
+                    label="Editar rol"
+                    (clicked)="openEdit(rol)"
+                  />
+                  <app-dropdown-item
+                    *appCan="'roles.cambiar_estado'; global: true"
+                    [icon]="rol.estado ? 'toggle_off' : 'toggle_on'"
+                    [label]="rol.estado ? 'Desactivar rol' : 'Activar rol'"
+                    [danger]="rol.estado"
+                    (clicked)="confirmToggle(rol)"
+                  />
+                </app-dropdown>
               </div>
             </div>
           }

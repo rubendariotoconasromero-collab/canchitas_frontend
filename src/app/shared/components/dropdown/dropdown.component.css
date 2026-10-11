@@ -1,0 +1,200 @@
+app-dropdown {
+  display: inline-flex;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+.app-dropdown {
+  position: relative;
+  display: inline-flex;
+}
+
+.dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 108px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: var(--border-radius-sm, 6px);
+  border: 1px solid var(--border-color, #dce3ed);
+  background: var(--bg-surface, #ffffff);
+  color: var(--primary, #0c2340);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  white-space: nowrap;
+  cursor: pointer;
+  text-transform: none;
+  line-height: 1;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.dropdown-chevron {
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.dropdown-trigger.is-open .dropdown-chevron {
+  transform: translateY(1px) rotate(225deg);
+}
+
+.dropdown-dots-svg {
+  display: block;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.dropdown-trigger:hover:not(:disabled) {
+  background: var(--rm-gold-light, #fff5d6);
+  color: var(--rm-navy, #0c2340);
+  border-color: var(--rm-gold-dark, #d49c09);
+}
+
+.dropdown-trigger.is-open {
+  background: var(--rm-gold-light, #fff5d6);
+  color: var(--rm-navy, #0c2340);
+  border-color: var(--rm-gold, #febe10);
+  box-shadow: 0 0 0 2px rgba(254, 190, 16, 0.2);
+}
+
+.dropdown-trigger:focus-visible {
+  outline: 2px solid var(--rm-gold, #febe10);
+  outline-offset: 1px;
+}
+
+.dropdown-trigger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dropdown-trigger .material-symbols-outlined {
+  font-size: 1.25rem;
+  line-height: 1;
+  text-transform: none;
+}
+
+.dropdown-menu {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  z-index: 1050;
+  min-width: 180px;
+  max-width: calc(100vw - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.35rem;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--container-border-color, #e2e8f0);
+  border-radius: var(--border-radius-md, 8px);
+  box-shadow: 0 10px 25px -5px rgba(12, 35, 64, 0.18), 0 8px 10px -6px rgba(12, 35, 64, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: dropdownFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdown-align-end {
+  right: auto;
+}
+
+.dropdown-align-start {
+  right: auto;
+}
+
+.app-dropdown .dropdown-menu[popover]:not(:popover-open) {
+  display: none;
+}
+
+.dropdown-divider {
+  height: 1px;
+  margin: 0.25rem 0;
+  background: var(--container-border-color, #e2e8f0);
+}
+
+/* Dropdown Item styles */
+.app-dropdown .dropdown-item-btn,
+.app-dropdown .dropdown-item-btn:hover,
+.app-dropdown .dropdown-item-btn:focus,
+.app-dropdown .dropdown-item-btn:active {
+  text-decoration: none;
+}
+
+.dropdown-item-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 500;
+  color: var(--text-700, #334155);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.12s ease, color 0.12s ease;
+  user-select: none;
+}
+
+.dropdown-item-btn:hover:not(:disabled) {
+  background: rgba(12, 35, 64, 0.06);
+  color: var(--text-900, #0c2340);
+}
+
+.dropdown-item-btn:focus-visible {
+  outline: 2px solid var(--rm-gold, #febe10);
+  outline-offset: -2px;
+}
+
+.dropdown-item-btn .material-symbols-outlined {
+  font-size: 1.15rem;
+  color: var(--text-500, #64748b);
+  transition: color 0.12s ease;
+}
+
+.dropdown-item-btn:hover:not(:disabled) .material-symbols-outlined {
+  color: var(--rm-navy, #0c2340);
+}
+
+.dropdown-item-btn.is-danger {
+  color: var(--danger-500, #dc2626);
+}
+
+.dropdown-item-btn.is-danger .material-symbols-outlined {
+  color: var(--danger-500, #dc2626);
+}
+
+.dropdown-item-btn.is-danger:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+}
+
+.dropdown-item-btn.is-danger:hover:not(:disabled) .material-symbols-outlined {
+  color: #b91c1c;
+}
+
+.dropdown-item-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

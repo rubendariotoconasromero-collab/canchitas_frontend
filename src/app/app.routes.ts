@@ -27,6 +27,10 @@ export const routes: Routes = [
     canActivateChild: [permissionGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+      { path: 'clientes', loadComponent: () => import('./features/reservas/clientes.component').then(m => m.ClientesComponent), data: {permission:'clientes.ver'} },
+      { path: 'agenda', loadComponent: () => import('./features/reservas/agenda.component').then(m => m.AgendaComponent), data: {permission:'reservas.ver'} },
+      { path: 'caja', loadComponent: () => import('./features/caja/caja.component').then(m => m.CajaComponent), data: {permission:'caja.ver'} },
+      { path: 'administracion-cajas', loadComponent: () => import('./features/caja/cajas-admin.component').then(m => m.CajasAdminComponent), data: {permission:'caja.configurar',global:true} },
       { path: 'negocio', component: CatalogPageComponent, data: {permission:'negocio.ver',catalog:'negocios'} },
       { path: 'sucursales', component: CatalogPageComponent, data: {permission:'sucursales.ver',catalog:'sucursales'} },
       { path: 'deportes', component: CatalogPageComponent, data: {permission:'deportes.ver',catalog:'deportes'} },

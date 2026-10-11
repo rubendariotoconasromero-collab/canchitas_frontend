@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { CatalogListComponent } from './catalog-list.component';
@@ -10,9 +11,10 @@ describe('Catalog forms', () => {
   let service: jasmine.SpyObj<CatalogService>;
   let can: jasmine.Spy;
   beforeEach(() => {
-    service = jasmine.createSpyObj('CatalogService',['list','save','deactivate']);
+    service = jasmine.createSpyObj('CatalogService',['list','save','deactivate','movePhoto']);
     service.list.and.returnValue(of([]));
     service.save.and.returnValue(of({id:1}));
+    service.movePhoto.and.returnValue(of([]));
     can = jasmine.createSpy('can').and.returnValue(true);
     TestBed.configureTestingModule({providers:[provideRouter([]),
       {provide:CatalogService,useValue:service},{provide:AuthService,useValue:{can}}]});
@@ -24,6 +26,17 @@ describe('Catalog forms', () => {
     fixture.detectChanges();
     return fixture;
   }
+  it('does not reload courts when user permissions are refreshed', () => {
+    const allowed = signal(true);
+    can.and.callFake(() => allowed());
+    const fixture = setup('canchas');
+    const calls = service.list.calls.count();
+    allowed.set(false);
+    fixture.detectChanges();
+    expect(service.list.calls.count()).toBe(calls);
+    fixture.componentInstance.load();
+    expect(service.list.calls.count()).toBe(calls + 1);
+  });
   it('renders every catalog without instantiating unopened form controls', () => {
     for (const key of Object.keys(CATALOG)) {
       const fixture = setup(key);
@@ -50,11 +63,14 @@ describe('Catalog forms', () => {
     fixture.detectChanges();
     const form: HTMLElement = fixture.nativeElement.querySelector('[data-catalog="canchas"]');
     const sections = Array.from(form.querySelectorAll('.catalog-form-section')).map(element => element.textContent?.trim());
-    expect(sections).toEqual(['Identificacion de la cancha', 'Condiciones de alquiler', 'Caracteristicas y estado']);
+    expect(sections).toEqual(['Identificacion de la cancha', 'Superficie y dimensiones', 'Condiciones de alquiler', 'Caracteristicas', 'Estado y publicacion']);
     expect(form.querySelectorAll('.checkbox-option').length).toBe(4);
     const fields = CATALOG['canchas'].fields.map(field => field.key);
-    expect(fields.indexOf('superficie')).toBe(fields.indexOf('nombre') + 1);
-    expect(fields.indexOf('descripcion_publica')).toBe(fields.indexOf('superficie') + 1);
+    expect(fields.indexOf('descripcion_publica')).toBe(fields.indexOf('nombre') + 1);
+    expect(fields.indexOf('ancho_metros')).toBe(fields.indexOf('superficie') + 1);
+    expect(fields.indexOf('largo_metros')).toBe(fields.indexOf('ancho_metros') + 1);
+    expect(form.querySelector('input[step="0.01"]')).not.toBeNull();
+    expect(form.querySelector('.court-area')?.textContent).toContain('Sin registrar');
   });
   it('shows a single business configuration and only updates its existing id', () => {
     const business = {id:1,nombre_comercial:'Soccer Real Madrid',moneda:'BOB',publicado:false};
@@ -82,7 +98,37 @@ describe('Catalog forms', () => {
     const args = service.save.calls.mostRecent().args;
     expect(args[2]).toBe(10);
     expect((args[1] as any).sucursal).toBe(7);
-    expect((args[1] as any).porcentaje_anticipo).toBeNull();
+    expect((args[1] as any).porcentaje_anticipo).toBeUndefined();
+    expect((args[1] as any).pago_total_obligatorio).toBeUndefined();
+    expect((args[1] as any).permite_reembolso).toBeUndefined();
+    expect(component.form.contains('porcentaje_anticipo')).toBeFalse();
+    expect(CATALOG['politicas'].columns.some(column => column.key === 'porcentaje_anticipo')).toBeFalse();
+    expect(fixture.nativeElement.querySelector('app-reservation-conditions')).toBeNull();
+  });
+  it('shows reservation rules and configured times in the row, without a top banner', () => {
+    can.and.returnValue(false);
+    service.list.and.returnValue(of([{id:10,sucursal:7,activo:true,horas_limite_cancelacion:8,minutos_retencion:20}]));
+    const fixture = setup('politicas');
+    const row: HTMLElement = fixture.nativeElement.querySelector('tbody tr');
+    expect(row.textContent).toContain('100 % del importe');
+    expect(row.textContent).toContain('Sin reembolso');
+    expect(row.textContent).toContain('8');
+    expect(row.textContent).toContain('20');
+    expect(fixture.nativeElement.querySelector('app-reservation-conditions')).toBeNull();
+    expect(fixture.componentInstance.display({minutos_retencion:null},'minutos_retencion')).toBe('Pendiente');
+  });
+  it('discards legacy advance values while keeping configurable cancellation and retention', () => {
+    const fixture = setup('politicas',{sucursal:7});
+    const component = fixture.componentInstance;
+    component.edit({id:10,sucursal:7,porcentaje_anticipo:50,horas_limite_cancelacion:5,minutos_retencion:15});
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.modal-body').textContent).toContain('Sin reembolso');
+    expect(fixture.nativeElement.textContent).not.toContain('Anticipo (%)');
+    component.form.patchValue({horas_limite_cancelacion:12});component.save();
+    const payload = service.save.calls.mostRecent().args[1] as CatalogRow;
+    expect(payload['porcentaje_anticipo']).toBeUndefined();
+    expect(payload['horas_limite_cancelacion']).toBe(12);
+    expect(payload['minutos_retencion']).toBe(15);
   });
   it('keeps the form open and displays API validation errors', () => {
     service.save.and.returnValue(throwError(() => ({error:{non_field_errors:['Horario superpuesto']}})));
@@ -101,10 +147,33 @@ describe('Catalog forms', () => {
     const fixture = setup('fotos',{cancha:3});
     const component = fixture.componentInstance;
     component.edit();
+    expect(component.form.contains('orden')).toBeFalse();
     component.fileChanged({target:{files:[new File(['image'], 'test.png',{type:'image/png'})]}} as unknown as Event);
     component.form.patchValue({texto_alternativo:'Vista frontal'});component.save();
     const payload = service.save.calls.mostRecent().args[1] as FormData;
     expect(payload.get('cancha')).toBe('3');
     expect(payload.get('archivo')).toBeInstanceOf(File);
+    expect(payload.has('orden')).toBeFalse();
+  });
+  it('moves photos through the dedicated endpoint and prevents boundary moves', () => {
+    const rows = [{id:1,orden:0},{id:2,orden:1}];
+    service.list.and.returnValue(of(rows));
+    const component = setup('fotos',{cancha:3}).componentInstance;
+    component.movePhoto(rows[0], 'subir');
+    component.movePhoto(rows[1], 'bajar');
+    expect(service.movePhoto).not.toHaveBeenCalled();
+    component.movePhoto(rows[1], 'subir');
+    expect(service.movePhoto).toHaveBeenCalledOnceWith(2, 'subir');
+    expect(component.movingPhoto()).toBeFalse();
+  });
+  it('keeps photos visible and reports a failed reorder', () => {
+    const rows = [{id:1,orden:0},{id:2,orden:1}];
+    service.list.and.returnValue(of(rows));
+    service.movePhoto.and.returnValue(throwError(() => ({error:{detail:'No permitido'}})));
+    const component = setup('fotos',{cancha:3}).componentInstance;
+    component.movePhoto(rows[1], 'subir');
+    expect(component.rows()).toEqual(rows);
+    expect(component.photoOrderError()).toContain('No permitido');
+    expect(component.movingPhoto()).toBeFalse();
   });
 });

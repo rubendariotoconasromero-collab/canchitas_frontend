@@ -11,7 +11,7 @@ import { BrandingService } from '../../../../core/services/branding.service';
   imports: [RouterLink, RouterLinkActive, CanDirective],
   host: { style: 'display: contents' },
   template: `
-      <aside class="sidebar" aria-label="Navegacion principal">
+      <aside id="main-sidebar" class="sidebar" aria-label="Navegacion principal">
         <div class="brand-block">
           <span class="brand-mark" aria-hidden="true">
             <img src="escudo-real-madrid.png" alt="Escudo Real Madrid" width="42" height="52" />
@@ -23,40 +23,64 @@ import { BrandingService } from '../../../../core/services/branding.service';
         </div>
 
         <nav class="sidebar-nav">
-          @if (auth.can('canchas.ver') || auth.can('deportes.ver') || auth.can('sucursales.ver') || auth.can('negocio.ver') || auth.can('politicas.ver')) {
+          @if(auth.can('reservas.ver') || auth.can('clientes.ver')) {
             <div class="nav-section">
-              <span class="nav-section-label">Espacios deportivos</span>
-              <a *appCan="'canchas.ver'" class="nav-item" routerLink="/canchas" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">sports_soccer</span><span>Canchas</span></a>
-              <a *appCan="'deportes.ver'" class="nav-item" routerLink="/deportes" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">sports</span><span>Deportes</span></a>
-              <a *appCan="'sucursales.ver'" class="nav-item" routerLink="/sucursales" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">location_on</span><span>Sucursales</span></a>
-              <a *appCan="'politicas.ver'" class="nav-item" routerLink="/politicas" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">policy</span><span>Politicas</span></a>
-              <a *appCan="'negocio.ver'; global: true" class="nav-item" routerLink="/negocio" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">storefront</span><span>Negocio</span></a>
+              <a *appCan="'reservas.ver'" class="nav-item" routerLink="/agenda" routerLinkActive="active" title="Agenda de reservas" (click)="navigated.emit()"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span><span>Agenda de reservas</span></a>
+              <a *appCan="'clientes.ver'" class="nav-item" routerLink="/clientes" routerLinkActive="active" title="Clientes" (click)="navigated.emit()"><span class="material-symbols-outlined" aria-hidden="true">contact_phone</span><span>Clientes</span></a>
             </div>
           }
+          <div class="nav-section" *appCan="'caja.ver'"><a class="nav-item" routerLink="/caja" routerLinkActive="active" title="Caja" (click)="navigated.emit()"><span class="material-symbols-outlined" aria-hidden="true">payments</span><span>Caja</span></a></div>
           <div class="nav-section" *appCan="'dashboard.ver'">
-            <span class="nav-section-label">Principal</span>
-            <a
-              class="nav-item"
-              routerLink="/dashboard"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              (click)="navigated.emit()"
-            >
-              <span class="material-symbols-outlined">space_dashboard</span>
+            <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" ariaCurrentWhenActive="page"
+              [routerLinkActiveOptions]="{ exact: true }" title="Dashboard" (click)="navigated.emit()">
+              <span class="material-symbols-outlined" aria-hidden="true">space_dashboard</span>
               <span>Dashboard</span>
             </a>
           </div>
+          @if (auth.can('canchas.ver') || auth.can('deportes.ver')) {
+            <div class="nav-section">
+              <button type="button" class="nav-item nav-group-toggle" title="Espacios deportivos"
+                [class.group-active]="catalogActive()" [attr.aria-expanded]="catalogExpanded()"
+                aria-controls="catalog-submenu" (click)="toggleCatalog()">
+                <span class="material-symbols-outlined" aria-hidden="true">sports_soccer</span>
+                <span>Espacios deportivos</span>
+                <span class="material-symbols-outlined nav-chevron" aria-hidden="true">{{ catalogExpanded() ? 'expand_less' : 'expand_more' }}</span>
+              </button>
+              <div id="catalog-submenu" class="nav-submenu" [hidden]="!catalogExpanded()">
+              <a *appCan="'canchas.ver'" class="nav-item" routerLink="/canchas" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">sports_soccer</span><span>Canchas</span></a>
+              <a *appCan="'deportes.ver'" class="nav-item" routerLink="/deportes" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">sports</span><span>Deportes</span></a>
+              </div>
+            </div>
+          }
+
+          @if (auth.can('negocio.ver', true) || auth.can('sucursales.ver') || auth.can('politicas.ver') || auth.can('caja.configurar', true)) {
+            <div class="nav-section">
+              <button type="button" class="nav-item nav-group-toggle" title="Configuracion del negocio"
+                [class.group-active]="businessActive()" [attr.aria-expanded]="businessExpanded()"
+                aria-controls="business-submenu" (click)="toggleBusiness()">
+                <span class="material-symbols-outlined" aria-hidden="true">storefront</span>
+                <span>Configuracion del negocio</span>
+                <span class="material-symbols-outlined nav-chevron" aria-hidden="true">{{ businessExpanded() ? 'expand_less' : 'expand_more' }}</span>
+              </button>
+              <div id="business-submenu" class="nav-submenu" [hidden]="!businessExpanded()">
+              <a *appCan="'negocio.ver'; global: true" class="nav-item" routerLink="/negocio" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">storefront</span><span>Negocio</span></a>
+              <a *appCan="'sucursales.ver'" class="nav-item" routerLink="/sucursales" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">location_on</span><span>Sucursales</span></a>
+              <a *appCan="'politicas.ver'" class="nav-item" routerLink="/politicas" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">policy</span><span>Politicas de reserva</span></a>
+              <a *appCan="'caja.configurar'; global: true" class="nav-item" routerLink="/administracion-cajas" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">payments</span><span>Administracion de cajas</span></a>
+              </div>
+            </div>
+          }
 
           @if (auth.can('usuarios.ver') || auth.can('roles.ver') || auth.can('permisos.ver')) {
           <div class="nav-section">
-            <span class="nav-section-label">Administracion</span>
             <button
               type="button"
               class="nav-item nav-group-toggle"
               [class.group-active]="accessActive()"
               [attr.aria-expanded]="accessExpanded()"
               aria-controls="access-submenu"
-              (click)="accessExpanded.set(!accessExpanded())"
+              title="Usuarios y accesos"
+              (click)="toggleAccess()"
             >
               <span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span>
               <span>Usuarios y accesos</span>
@@ -101,11 +125,17 @@ export class SidebarComponent {
   readonly auth = inject(AuthService);
   readonly userName = input('Usuario');
   readonly userEmail = input('');
+  readonly compact = input(false);
+  readonly expandRequested = output<void>();
   readonly navigated = output<void>();
   readonly signedOut = output<void>();
   private readonly router = inject(Router);
   readonly accessActive = signal(this.isAccessRoute(this.router.url));
   readonly accessExpanded = signal(this.isAccessRoute(this.router.url));
+  readonly catalogActive = signal(this.isCatalogRoute(this.router.url));
+  readonly catalogExpanded = signal(this.isCatalogRoute(this.router.url));
+  readonly businessActive = signal(this.isBusinessRoute(this.router.url));
+  readonly businessExpanded = signal(this.isBusinessRoute(this.router.url));
 
   constructor() {
     this.router.events.pipe(
@@ -114,10 +144,37 @@ export class SidebarComponent {
     ).subscribe(event => {
       this.accessActive.set(this.isAccessRoute(event.urlAfterRedirects));
       if (this.accessActive()) this.accessExpanded.set(true);
+      this.catalogActive.set(this.isCatalogRoute(event.urlAfterRedirects));
+      if (this.catalogActive()) this.catalogExpanded.set(true);
+      this.businessActive.set(this.isBusinessRoute(event.urlAfterRedirects));
+      if (this.businessActive()) this.businessExpanded.set(true);
     });
   }
 
   private isAccessRoute(url: string): boolean {
     return /^\/(usuarios|roles|permisos)(?:[/?#]|$)/.test(url);
+  }
+
+  toggleAccess(): void {
+    this.accessExpanded.set(this.compact() || !this.accessExpanded());
+    if (this.compact()) this.expandRequested.emit();
+  }
+
+  toggleCatalog(): void {
+    this.catalogExpanded.set(this.compact() || !this.catalogExpanded());
+    if (this.compact()) this.expandRequested.emit();
+  }
+
+  private isCatalogRoute(url: string): boolean {
+    return /^\/(canchas|deportes)(?:[/?#]|$)/.test(url);
+  }
+
+  toggleBusiness(): void {
+    this.businessExpanded.set(this.compact() || !this.businessExpanded());
+    if (this.compact()) this.expandRequested.emit();
+  }
+
+  private isBusinessRoute(url: string): boolean {
+    return /^\/(negocio|sucursales|politicas|administracion-cajas)(?:[/?#]|$)/.test(url);
   }
 }

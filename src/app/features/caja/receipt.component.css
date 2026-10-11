@@ -1,0 +1,10 @@
+.cash-receipt { max-width: 640px; margin: 0 auto; font-size: 14px; color: var(--text-700); }
+.cash-receipt header { padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+.cash-receipt h2 { font-size: 22px; margin-bottom: 8px; }
+.cash-receipt small { overflow-wrap: anywhere; }
+.cash-receipt dl { margin: 18px 0; }
+.cash-receipt dl > div { display: grid; grid-template-columns: 140px minmax(0,1fr); gap: 12px; margin: 10px 0; }
+.cash-receipt dd { margin: 0; overflow-wrap: anywhere; }
+.receipt-total { display: flex; justify-content: space-between; gap: 16px; border-block: 1px solid var(--border-color); padding: 14px 0; margin-bottom: 14px; }
+.receipt-print-action { margin-top: 20px; text-align: right; }
+@media(max-width:500px){.cash-receipt dl > div {grid-template-columns:1fr;gap:4px;}}
