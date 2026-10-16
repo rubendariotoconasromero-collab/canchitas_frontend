@@ -75,6 +75,8 @@ assert.equal(component.free(1).length, 0);
 assert.equal(component.availabilityStatus(1, true), 'Jornada finalizada');
 component.agenda.set(null); assert.equal(component.free(1).length, 0);
 assert.equal(parseTemplate(template, 'agenda').errors, null);
+assert.match(template, /slots.length===1 \? 'horario disponible' : 'horarios disponibles'/);
+assert.doesNotMatch(template, /intervalos? disponibles?/);
 assert.match(template, /@let slots = free\(c.id\)/);
 assert.match(template, /@for\(slot of slots;track slot.inicio\)/);
 assert.match(template, /<span>\{\{slotLabel\(slot.inicio\)\}\} - \{\{slotLabel\(slot.fin\)\}\}<\/span>/);

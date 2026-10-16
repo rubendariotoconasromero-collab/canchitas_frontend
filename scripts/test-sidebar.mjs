@@ -29,7 +29,7 @@ for(const url of ['/canchas','/canchas/5','/deportes?search=futbol']){
   navigation(new NavigationEnd(url));
   assert.equal(sidebar.catalogActive(),true);assert.equal(sidebar.businessActive(),false);
 }
-for(const url of ['/negocio','/sucursales?search=central','/politicas#detalle','/administracion-cajas']){
+for(const url of ['/negocio','/contenido-web','/sucursales?search=central','/politicas#detalle','/administracion-cajas']){
   navigation(new NavigationEnd(url));
   assert.equal(sidebar.businessActive(),true);assert.equal(sidebar.catalogActive(),false);
 }
@@ -44,7 +44,7 @@ function find(nodes,predicate){for(const node of nodes){if(predicate(node))retur
 function groupLinks(id){const group=find(parsed.nodes,n=>n.attributes?.some(a=>a.name==='id'&&a.value===id));
   return group.children.map(node=>node.children?.[0]||node).map(node=>node.attributes?.find(a=>a.name==='routerLink')?.value).filter(Boolean);}
 assert.deepEqual(groupLinks('catalog-submenu'),['/canchas','/deportes']);
-assert.deepEqual(groupLinks('business-submenu'),['/negocio','/sucursales','/politicas','/administracion-cajas']);
+assert.deepEqual(groupLinks('business-submenu'),['/negocio','/contenido-web','/sucursales','/politicas','/administracion-cajas']);
 const branch=find(parsed.nodes,n=>n.expression?.source.includes("auth.can('negocio.ver', true)"));
 const isVisible=new Function('auth',`return ${branch.expression.source}`);
 const permissions=(values,global=false)=>({can:(p,needsGlobal=false)=>values.includes(p)&&(!needsGlobal||global)});

@@ -8,11 +8,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { AuthService } from '../../core/services/auth.service';
 import { PageNavigationService } from '../../core/services/page-navigation.service';
-import { SnackbarComponent } from '../../shared/components/snackbar/snackbar.component';
 
 @Component({
   selector: 'app-main-layout',
-  imports: [RouterOutlet, SidebarComponent, TopbarComponent, SnackbarComponent],
+  imports: [RouterOutlet, SidebarComponent, TopbarComponent],
   template: `
     <div class="app-shell" [class.sidebar-open]="menuOpen()" [class.sidebar-compact]="sidebarCompact()" (keydown.escape)="closeMenu()">
       <button
@@ -34,7 +33,6 @@ import { SnackbarComponent } from '../../shared/components/snackbar/snackbar.com
         </main>
       </section>
     </div>
-    <app-snackbar />
   `,
 })
 export class MainLayoutComponent {
@@ -89,11 +87,12 @@ export class MainLayoutComponent {
   private resolvePageTitle(url: string): string {
     const segment = url.split('?')[0].split('/').filter(Boolean)[0] ?? 'dashboard';
     const titles: Record<string, string> = {
-      agenda: 'Agenda de reservas', clientes: 'Clientes',
+      agenda: 'Agenda de reservas', clientes: 'Clientes', solicitudes: 'Solicitudes web',
       caja: 'Caja', 'administracion-cajas': 'Administracion de cajas',
       canchas: 'Espacios deportivos', deportes: 'Deportes', negocio: 'Negocio',
-      sucursales: 'Sucursales', politicas: 'Politicas de reserva',
+      sucursales: 'Sucursales', politicas: 'Politicas de reserva', 'contenido-web': 'Contenido web',
       dashboard: 'Resumen general',
+      reportes: 'Reportes', auditoria: 'Auditoria',
       usuarios: 'Gestion de usuarios',
       roles: 'Gestion de roles',
       permisos: 'Gestion de permisos',

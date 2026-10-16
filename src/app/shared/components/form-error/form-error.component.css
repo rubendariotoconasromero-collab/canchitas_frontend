@@ -1,0 +1,5 @@
+:host { display:block; }
+.form-error { display:flex; align-items:flex-start; gap:.65rem; font-size:14px; line-height:1.5; margin-bottom:1rem; scroll-margin-block:80px; }
+.form-error .material-symbols-outlined { font-size:18px; flex:0 0 18px; margin-top:2px; }
+.form-error>span:last-child { white-space:pre-line; overflow-wrap:anywhere; min-width:0; }
+.form-error:focus { outline:2px solid var(--alert-error-border-color); outline-offset:2px; }

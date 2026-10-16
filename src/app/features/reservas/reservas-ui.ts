@@ -9,7 +9,10 @@ import { CheckboxComponent } from '../../shared/components/checkbox/checkbox.com
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ListShellComponent } from '../../shared/components/list-shell/list-shell.component';
+import { TableComponent } from '../../shared/components/table/table.component';
 import { ButtonLinkComponent } from '../../shared/components/button/button-link.component';
 import { SearchSelectComponent } from '../../shared/components/search-select/search-select.component';
+import { LoadingComponent } from '../../shared/components/loading/loading.component';
+import { FormErrorComponent } from '../../shared/components/form-error/form-error.component';
 
-export const RESERVAS_UI = [FormsModule, ListToolbarComponent, FilterContextComponent, BadgeComponent, ButtonComponent, ButtonLinkComponent, InputComponent, SelectComponent, SearchSelectComponent, CheckboxComponent, ModalComponent, PageHeaderComponent, ListShellComponent];
+export const RESERVAS_UI = [FormsModule, ListToolbarComponent, FilterContextComponent, BadgeComponent, ButtonComponent, ButtonLinkComponent, InputComponent, SelectComponent, SearchSelectComponent, CheckboxComponent, ModalComponent, PageHeaderComponent, ListShellComponent, TableComponent, LoadingComponent, FormErrorComponent];

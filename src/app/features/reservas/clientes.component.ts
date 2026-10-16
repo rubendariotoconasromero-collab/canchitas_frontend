@@ -23,13 +23,13 @@ import { DropdownComponent, DropdownItemComponent } from '../../shared/component
       </div>
     </app-list-toolbar>
     <app-list-shell [loading]="loading()" [error]="error()" [empty]="!rows().length" (retry)="load()">
-      <table class="table align-middle mb-0"><thead><tr><th>Cliente</th><th>Telefono</th><th>Correo</th><th>Documento</th><th>Estado</th><th class="text-center">Acciones</th></tr></thead>
+      <app-table label="Clientes"><thead><tr><th scope="col">Cliente</th><th scope="col">Telefono</th><th scope="col">Correo</th><th scope="col">Documento</th><th scope="col">Estado</th>@if(auth.can('clientes.editar')){<th scope="col" class="text-center">Acciones</th>}</tr></thead>
       <tbody>@for(row of rows(); track row.id) { <tr><td><strong>{{row.nombre}}</strong></td><td>{{row.telefono}}</td><td>{{row.correo || '-'}}</td><td>{{row.documento || '-'}}</td><td><app-badge [active]="row.activo" /></td>
-      <td class="text-center">@if(auth.can('clientes.editar')) {
+      @if(auth.can('clientes.editar')) {<td class="text-center">
         <app-dropdown align="end" [title]="'Acciones para ' + row.nombre">
           <app-dropdown-item icon="edit" label="Editar cliente" (clicked)="edit(row)" />
         </app-dropdown>
-      }</td></tr> }</tbody></table>
+      </td>}</tr> }</tbody></app-table>
     </app-list-shell>
   </div>
   <app-cliente-editor [open]="open()" [client]="editing()" [branches]="branches" [branch]="branch" (closed)="open.set(false)" (saved)="open.set(false);load()" />

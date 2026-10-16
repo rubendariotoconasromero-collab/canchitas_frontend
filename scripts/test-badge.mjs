@@ -14,7 +14,7 @@ assert.equal(appearance({active:false,inactiveLabel:'Borrador'}).label,'Borrador
 for(const [state,tone,label] of [
   ['PENDIENTE','warning','Pendiente de pago'],['CONFIRMADA','success','Confirmada'],
   ['EN_CURSO','info','En curso'],['FINALIZADA','neutral','Finalizada'],
-  ['CANCELADA','danger','Cancelada'],['EXPIRADA','neutral','Retencion vencida'],
+  ['CANCELADA','danger','Cancelada'],['EXPIRADA','neutral','Plazo de pago vencido'],
   ['ABIERTO','success','Abierto'],['CERRADO','neutral','Cerrado']]){
   assert.equal(appearance({state}).label,label);assert.equal(appearance({state}).tone,tone);
 }

@@ -9,7 +9,6 @@ import { ErrorStateComponent } from '../states/error-state.component';
   imports: [EmptyStateComponent, LoadingStateComponent, ErrorStateComponent],
   template: `
     <div class="list-container" [attr.aria-busy]="loading()">
-      <ng-content select=".list-header" />
       @if (loading()) { <app-loading-state /> }
       @else if (error()) { <app-error-state [message]="error()" (retry)="retry.emit()" /> }
       @else if (empty()) { <app-empty-state [message]="emptyMessage()" /> }

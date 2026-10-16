@@ -21,7 +21,16 @@ export class CatalogService {
     }));
   }
   deactivate(endpoint: string, id: number) { return this.http.delete(this.url(endpoint,id)); }
+  uploadPhotos(data: FormData) {
+    return this.http.post<CatalogRow[]>(`${this.url('fotos')}lote/`, data);
+  }
   movePhoto(id: number, direction: 'subir' | 'bajar') {
     return this.http.post<CatalogRow[]>(`${this.url('fotos', id)}mover/`, {direccion: direction});
+  }
+  move(endpoint: string, id: number, direction: 'subir' | 'bajar') {
+    return this.http.post<CatalogRow[]>(`${this.url(endpoint, id)}mover/`, {direccion: direction});
+  }
+  publication() {
+    return this.http.get<{slides_publicados:number;pendientes:string[]}>(this.url('configuracion-web')+'publicacion/');
   }
 }

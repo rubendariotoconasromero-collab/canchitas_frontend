@@ -71,12 +71,15 @@ export class SearchSelectComponent implements ControlValueAccessor {
   setDisabledState(disabled: boolean): void { this.disabled.set(disabled); if(disabled) this.expanded.set(false); }
   show(): void { if(this.disabled()) return; this.query.set(''); this.active.set(Math.max(0, this.options().findIndex(x => x.value === this.value()))); this.expanded.set(true); }
   search(query: string): void {
+    if(this.disabled()) return;
     this.query.set(query); this.value.set(''); this.onChange(''); this.active.set(0); this.expanded.set(true);
   }
   choose(option: SelectOption): void {
+    if(this.disabled() || !this.options().some(item=>item.value===option.value)) return;
     this.value.set(option.value); this.onChange(option.value); this.onTouched(); this.field()?.nativeElement.focus(); this.expanded.set(false);
   }
   toggle(): void {
+    if(this.disabled()) return;
     if(this.value()) { this.value.set(''); this.onChange(''); this.onTouched(); }
     this.expanded() ? this.expanded.set(false) : this.show();
     if(this.expanded()) this.field()?.nativeElement.focus();
@@ -86,6 +89,7 @@ export class SearchSelectComponent implements ControlValueAccessor {
     this.expanded.set(false); this.onTouched();
   }
   key(event: KeyboardEvent): void {
+    if(this.disabled()) return;
     if(event.key === 'Escape') { if(this.expanded()) event.stopPropagation(); this.expanded.set(false); return; }
     if(event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();

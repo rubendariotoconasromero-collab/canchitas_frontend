@@ -105,6 +105,7 @@ body {
   white-space: nowrap;
   direction: ltr;
   font-feature-settings: 'liga';
+  font-variant-ligatures: common-ligatures;
   -webkit-font-smoothing: antialiased;
   vertical-align: middle;
 }
@@ -1118,21 +1119,6 @@ body {
   gap: 12px;
 }
 
-.usuarios-list .list-header,
-.usuarios-list .list-row {
-  grid-template-columns: 60px 1.7fr 2fr 1.2fr 110px 132px;
-}
-
-.roles-list .list-header,
-.roles-list .list-row {
-  grid-template-columns: 60px 1.5fr 2fr 100px 110px 132px;
-}
-
-.permisos-list .list-header,
-.permisos-list .list-row {
-  grid-template-columns: 60px 1.5fr 2.2fr 110px 132px;
-}
-
 .user-cell {
   display: flex;
   align-items: center;
@@ -1433,9 +1419,6 @@ body {
 
 }
 /* The scroll container stays within the viewport; only table rows keep their width. */
-.usuarios-list .list-header, .usuarios-list .list-row { min-width: 800px; }
-.roles-list .list-header, .roles-list .list-row { min-width: 720px; }
-.permisos-list .list-header, .permisos-list .list-row { min-width: 640px; }
 app-metric-card, app-quick-access { display: block; min-width: 0; }
 body:has(dialog[open]) .content-area { overflow: hidden; }
 body:has(dialog[open]) { overflow: hidden; }

@@ -45,11 +45,12 @@ function setup(query = {}, allowed = true) {
     block: data => write('block', data),
   };
   const mocks = {
-    '@angular/core': {Component: () => value => value, signal, computed: fn => fn, inject: token => token === Api ? api : token === Auth ? {can: () => allowed} : token === Route ? {snapshot:{queryParamMap:{get:name=>query[name]??null}}} : token === Router ? {navigate:(...args)=>{navigations.push(args);return Promise.resolve(true);}} : {}},
+    '@angular/core': {Component: () => value => value, signal, computed: fn => fn, inject: token => token === Api ? api : token === Auth ? {can: () => allowed} : token === Route ? {queryParamMap:{subscribe:fn=>{fn({get:name=>query[name]??null});return {unsubscribe(){}};}}} : token === Router ? {navigate:(...args)=>{navigations.push(args);return Promise.resolve(true);}} : {success:()=>{}}},
     '@angular/router': {ActivatedRoute:Route, Router},
     '@angular/core/rxjs-interop': {takeUntilDestroyed: () => null},
     rxjs: {interval: () => ({pipe: () => ({subscribe() {}})})},
     '../../core/services/auth.service': {AuthService: Auth},
+    '../../core/services/snackbar.service': {SnackbarService: class {}},
     './reservas.service': {ReservasService: Api, apiError: error => error.error.detail},
     './reservas-ui': {RESERVAS_UI: []},
     './agenda.utils': utilities,

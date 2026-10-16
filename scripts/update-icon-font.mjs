@@ -1,19 +1,11 @@
 import assert from 'node:assert/strict';
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+import {iconInventory} from './icon-inventory.mjs';
 
-// Include dynamic names (ternaries, config and defaults), not just literal spans.
-const icons = [
-  'add', 'admin_panel_settings', 'api', 'arrow_forward', 'badge', 'calendar_month',
-  'cancel', 'check_circle', 'close', 'contact_phone', 'content_copy', 'database',
-  'delete', 'edit', 'error', 'expand_less', 'expand_more', 'group', 'help', 'help_outline',
-  'image', 'inbox', 'info', 'key', 'keyboard_double_arrow_left',
-  'keyboard_double_arrow_right', 'location_on', 'lock', 'login', 'logout',
-  'manage_accounts', 'menu', 'monitoring', 'more_horiz', 'more_vert', 'open_in_new', 'panorama', 'payments',
-  'person', 'person_add', 'photo_library', 'policy', 'public', 'refresh', 'rule',
-  'save', 'schedule', 'search', 'search_off', 'settings', 'shield', 'space_dashboard', 'sports',
-  'sports_soccer', 'storefront', 'toggle_off', 'toggle_on', 'verified_user', 'visibility',
-  'visibility_off', 'warning',
-].sort();
+const icons = iconInventory(fileURLToPath(new URL('../src/app/', import.meta.url)));
+assert.ok(icons.length, 'No icons detected in the frontend');
 const cssUrl = new URL('https://fonts.googleapis.com/css2');
 cssUrl.searchParams.set('family', 'Material Symbols Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 cssUrl.searchParams.set('icon_names', icons.join(','));
@@ -30,6 +22,14 @@ assert.ok(fontResponse.ok, `Font download returned ${fontResponse.status}`);
 const font = Buffer.from(await fontResponse.arrayBuffer());
 assert.equal(font.toString('ascii', 0, 4), 'wOF2');
 assert.equal(font.readUInt32BE(8), font.length, 'Incomplete WOFF2 download');
-// Do not overwrite the working asset until the entire download has been validated.
+const sha256 = createHash('sha256').update(font).digest('hex');
+// Keep the preload and font-face on the same content-versioned URL.
+const indexUrl = new URL('../src/index.html', import.meta.url);
+const index = await readFile(indexUrl, 'utf8');
+const fontPath = 'assets/fonts/material-symbols-outlined.woff2?v=';
+assert.equal((index.match(/assets\/fonts\/material-symbols-outlined\.woff2\?v=[a-z0-9]+/g) || []).length, 2);
+// Validate the download and configuration before replacing any working files.
 await writeFile(new URL('../public/assets/fonts/material-symbols-outlined.woff2', import.meta.url), font);
+await writeFile(new URL('../public/assets/fonts/material-symbols-outlined.json', import.meta.url), JSON.stringify({icons, sha256}, null, 2) + '\n');
+await writeFile(indexUrl, index.replace(/assets\/fonts\/material-symbols-outlined\.woff2\?v=[a-z0-9]+/g, fontPath + sha256.slice(0, 12)));
 console.log(`${icons.length} iconos locales: ${font.length} bytes.`);

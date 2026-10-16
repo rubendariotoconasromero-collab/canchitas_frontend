@@ -23,13 +23,15 @@ import { BrandingService } from '../../../../core/services/branding.service';
         </div>
 
         <nav class="sidebar-nav">
-          @if(auth.can('reservas.ver') || auth.can('clientes.ver')) {
+          @if(auth.can('reservas.ver') || auth.can('clientes.ver') || auth.can('solicitudes.ver')) {
             <div class="nav-section">
               <a *appCan="'reservas.ver'" class="nav-item" routerLink="/agenda" routerLinkActive="active" title="Agenda de reservas" (click)="navigated.emit()"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span><span>Agenda de reservas</span></a>
               <a *appCan="'clientes.ver'" class="nav-item" routerLink="/clientes" routerLinkActive="active" title="Clientes" (click)="navigated.emit()"><span class="material-symbols-outlined" aria-hidden="true">contact_phone</span><span>Clientes</span></a>
+              <a *appCan="'solicitudes.ver'" class="nav-item" routerLink="/solicitudes" routerLinkActive="active" title="Solicitudes web" (click)="navigated.emit()"><span class="material-symbols-outlined" aria-hidden="true">inbox</span><span>Solicitudes web</span></a>
             </div>
           }
           <div class="nav-section" *appCan="'caja.ver'"><a class="nav-item" routerLink="/caja" routerLinkActive="active" title="Caja" (click)="navigated.emit()"><span class="material-symbols-outlined" aria-hidden="true">payments</span><span>Caja</span></a></div>
+          <div class="nav-section" *appCan="'reportes.ver'"><a class="nav-item" routerLink="/reportes" routerLinkActive="active" title="Reportes" (click)="navigated.emit()"><span class="material-symbols-outlined" aria-hidden="true">space_dashboard</span><span>Reportes</span></a></div>
           <div class="nav-section" *appCan="'dashboard.ver'">
             <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" ariaCurrentWhenActive="page"
               [routerLinkActiveOptions]="{ exact: true }" title="Dashboard" (click)="navigated.emit()">
@@ -53,7 +55,7 @@ import { BrandingService } from '../../../../core/services/branding.service';
             </div>
           }
 
-          @if (auth.can('negocio.ver', true) || auth.can('sucursales.ver') || auth.can('politicas.ver') || auth.can('caja.configurar', true)) {
+          @if (auth.can('negocio.ver', true) || auth.can('contenido_web.ver', true) || auth.can('sucursales.ver') || auth.can('politicas.ver') || auth.can('caja.configurar', true)) {
             <div class="nav-section">
               <button type="button" class="nav-item nav-group-toggle" title="Configuracion del negocio"
                 [class.group-active]="businessActive()" [attr.aria-expanded]="businessExpanded()"
@@ -64,6 +66,7 @@ import { BrandingService } from '../../../../core/services/branding.service';
               </button>
               <div id="business-submenu" class="nav-submenu" [hidden]="!businessExpanded()">
               <a *appCan="'negocio.ver'; global: true" class="nav-item" routerLink="/negocio" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">storefront</span><span>Negocio</span></a>
+              <a *appCan="'contenido_web.ver'; global: true" class="nav-item" routerLink="/contenido-web" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">web</span><span>Contenido web</span></a>
               <a *appCan="'sucursales.ver'" class="nav-item" routerLink="/sucursales" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">location_on</span><span>Sucursales</span></a>
               <a *appCan="'politicas.ver'" class="nav-item" routerLink="/politicas" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">policy</span><span>Politicas de reserva</span></a>
               <a *appCan="'caja.configurar'; global: true" class="nav-item" routerLink="/administracion-cajas" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">payments</span><span>Administracion de cajas</span></a>
@@ -71,7 +74,7 @@ import { BrandingService } from '../../../../core/services/branding.service';
             </div>
           }
 
-          @if (auth.can('usuarios.ver') || auth.can('roles.ver') || auth.can('permisos.ver')) {
+          @if (auth.can('usuarios.ver') || auth.can('roles.ver') || auth.can('permisos.ver') || auth.can('auditoria.ver', true)) {
           <div class="nav-section">
             <button
               type="button"
@@ -99,6 +102,7 @@ import { BrandingService } from '../../../../core/services/branding.service';
               <span class="material-symbols-outlined">key</span>
               <span>Permisos</span>
             </a>
+            <a *appCan="'auditoria.ver'; global: true" class="nav-item" routerLink="/auditoria" routerLinkActive="active" (click)="navigated.emit()"><span class="material-symbols-outlined">history</span><span>Auditoria</span></a>
             </div>
           </div>
           }
@@ -152,7 +156,7 @@ export class SidebarComponent {
   }
 
   private isAccessRoute(url: string): boolean {
-    return /^\/(usuarios|roles|permisos)(?:[/?#]|$)/.test(url);
+    return /^\/(usuarios|roles|permisos|auditoria)(?:[/?#]|$)/.test(url);
   }
 
   toggleAccess(): void {
@@ -175,6 +179,6 @@ export class SidebarComponent {
   }
 
   private isBusinessRoute(url: string): boolean {
-    return /^\/(negocio|sucursales|politicas|administracion-cajas)(?:[/?#]|$)/.test(url);
+    return /^\/(negocio|contenido-web|sucursales|politicas|administracion-cajas)(?:[/?#]|$)/.test(url);
   }
 }

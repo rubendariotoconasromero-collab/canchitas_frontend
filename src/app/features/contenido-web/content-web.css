@@ -1,0 +1,5 @@
+.publication { padding-block:1rem; }
+.publication h2 { font-size:20px; }
+.publication p { margin-top:1rem; }
+.publication .alert { font-size:14px; margin-top:1rem; }
+.publication ul { margin:0; padding-left:1.25rem; }

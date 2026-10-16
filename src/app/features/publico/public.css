@@ -1,0 +1,50 @@
+:host { display: block; }
+.public-width { width: min(1180px, calc(100% - 3rem)); margin-inline: auto; }
+.public-page { padding-block: 3rem 4rem; }
+.public-section { padding-block: 2rem 3rem; }
+.public-court-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1.5rem; }
+.public-court-card { border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+.public-court-card > img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+.public-court-body { padding: 1.3rem; }
+.public-court-body small { color: var(--text-500); }
+.public-court-body h2 { font-size: 22px; margin: .5rem 0; }
+.public-court-body p { font-size: 14px; }
+.public-sport-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+.public-court-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-top: 1.25rem; font-size: 14px; }
+.public-contact { background: #f3f4f0; padding-block: 3rem; border-top: 1px solid var(--border-color); }
+.public-contact h2 { font-size: 24px; }
+.public-locations { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1.5rem; margin-block: 1.5rem; }
+.public-locations h3 { font-size: 17px; }
+.public-locations a { display: block; margin-top: .5rem; color: inherit; }
+.public-contact-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+.public-contact-links a { color: inherit; }
+.public-empty { padding-block: 1.5rem; color: var(--text-500); }
+.public-detail-grid { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); gap: 2rem; align-items: start; }
+.public-gallery-main { width: 100%; aspect-ratio: 4/3; object-fit: contain; background: #f3f4f0; border-radius: 6px; }
+.public-gallery-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; margin: .8rem 0 1.5rem; }
+.public-gallery-thumbs button { border: 2px solid transparent; padding: 0; background: none; border-radius: 4px; }
+.public-gallery-thumbs button[aria-pressed="true"] { border-color: var(--button-primary-color); }
+.public-gallery-thumbs img { width: 72px; height: 54px; object-fit: cover; }
+.public-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; border-block: 1px solid #e0e5eb; padding-block: 1rem; margin-block: 1rem; font-size: 14px; }
+.public-specs dt { color: var(--text-500); font-weight: 400; font-size: 12px; }
+.public-specs dd { margin: .3rem 0 0; }
+.public-booking { border-left: 1px solid #e0e5eb; padding-left: 2rem; }
+.public-booking h2 { font-size: 22px; margin-bottom: 1rem; }
+.public-form { display: grid; gap: 1rem; }
+.public-field-row { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
+.public-field-row > * { min-width: 0; }
+.public-price { border-block: 1px solid #e0e5eb; padding-block: 1rem; }
+.public-price strong { font-size: 24px; display: block; }
+.public-price p { font-size: 14px; margin-top: .7rem; }
+.public-slots { display: flex; flex-wrap: wrap; gap: .5rem; font-size: 13px; }
+.public-tracking { max-width: 700px; }
+.public-history-secondary { display: block; margin-top: .35rem; font-size: 12px; color: var(--text-500); }
+.public-history-money { white-space: nowrap; }
+.public-history-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); margin-top: 1.5rem; font-size: 13px; color: var(--text-500); }
+.public-tracking-result { border-top: 3px solid var(--button-primary-color); padding-top: 1.5rem; margin-top: 1.5rem; }
+.public-width h3 { font-size: 18px; }
+.public-width .alert { font-size: 14px; }
+.public-width p, .public-width h2, .public-width dd { overflow-wrap: anywhere; }
+.public-detail-grid > *, .public-form > * { min-width: 0; }
+@media(max-width:760px) { .public-width { width: calc(100% - 2rem); } .public-page { padding-block: 2rem 3rem; } .public-court-grid,.public-detail-grid,.public-locations { grid-template-columns: 1fr; } .public-booking { padding: 1.5rem 0 0; border-left: 0; border-top: 1px solid #e0e5eb; } }
+@media(max-width:420px) { .public-field-row { grid-template-columns:1fr; } }

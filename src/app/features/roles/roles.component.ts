@@ -1,7 +1,9 @@
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { apiError } from '../../core/utils/api-error';
 import { CanDirective } from '../../shared/directives/can.directive';
 import { AuthService } from '../../core/services/auth.service';
 import { ListToolbarComponent } from '../../shared/components/list-toolbar/list-toolbar.component';
+import { TableComponent } from '../../shared/components/table/table.component';
 import { ListShellComponent } from '../../shared/components/list-shell/list-shell.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { CheckboxComponent } from '../../shared/components/checkbox/checkbox.component';
@@ -19,7 +21,7 @@ import { RolPayload, RolService } from './rol.service';
 @Component({
   selector: 'app-roles',
   standalone: true,
-  imports: [CanDirective, PageHeaderComponent, ListToolbarComponent, ListShellComponent, ModalComponent, CheckboxComponent, AccessFormModalComponent, ButtonComponent, BadgeComponent, ConfirmationModalComponent, DropdownComponent, DropdownItemComponent],
+  imports: [TableComponent,CanDirective, PageHeaderComponent, ListToolbarComponent, ListShellComponent, ModalComponent, CheckboxComponent, AccessFormModalComponent, ButtonComponent, BadgeComponent, ConfirmationModalComponent, DropdownComponent, DropdownItemComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
@@ -31,25 +33,25 @@ import { RolPayload, RolService } from './rol.service';
       <app-list-toolbar searchLabel="Buscar rol" entity="roles"
         [total]="roles().length" [active]="activos()" [(query)]="query" [showRefresh]="true" [loading]="loading()" (refreshed)="load()" />
 
-      <app-list-shell class="roles-list" [loading]="loading()" [error]="loadError()"
-        [empty]="filteredRoles().length === 0" (retry)="load()">
-        <div class="list-header">
-          <div class="list-col">ID</div>
-          <div class="list-col">Nombre</div>
-          <div class="list-col hide-sm">Descripcion</div>
-          <div class="list-col text-center">Permisos</div>
-          <div class="list-col text-center">Estado</div>
-          <div class="list-col text-center">Acciones</div>
-        </div>
+      <app-list-shell [loading]="loading()" [error]="loadError()"
+        [empty]="filteredRoles().length === 0" (retry)="load()"><app-table label="Roles" minWidth="720px" class="roles-list">
+        <thead><tr>
+          <th scope="col">ID</th>
+          <th scope="col">Nombre</th>
+          <th scope="col" class="hide-sm">Descripcion</th>
+          <th scope="col" class="text-center">Permisos</th>
+          <th scope="col" class="text-center">Estado</th>
+          @if(showActions){<th scope="col" class="text-center">Acciones</th>}
+        </tr></thead><tbody>
 
           @for (rol of filteredRoles(); track rol.id) {
-            <div class="list-row">
-              <div class="list-col list-col-id">#{{ rol.id }}</div>
-              <div class="list-col list-col-bold">{{ rol.nombre }}</div>
-              <div class="list-col hide-sm list-col-muted">{{ rol.descripcion || 'Sin descripcion' }}</div>
-              <div class="list-col center-col">{{ rol.permisos?.length ?? 0 }}</div>
-              <div class="list-col center-col"><app-badge [active]="rol.estado" /></div>
-              <div class="list-col list-col-actions">
+            <tr>
+              <td class="table-id">#{{ rol.id }}</td>
+              <td class="table-bold">{{ rol.nombre }}</td>
+              <td class="hide-sm table-muted">{{ rol.descripcion || 'Sin descripcion' }}</td>
+              <td class="text-center">{{ rol.permisos?.length ?? 0 }}</td>
+              <td class="text-center"><app-badge [active]="rol.estado" /></td>
+              @if(showActions){<td class="table-actions">
                 <app-dropdown align="end" [title]="'Acciones para ' + rol.nombre">
                   <app-dropdown-item
                     *appCan="'roles.asignar_permisos'; global: true"
@@ -71,10 +73,10 @@ import { RolPayload, RolService } from './rol.service';
                     (clicked)="confirmToggle(rol)"
                   />
                 </app-dropdown>
-              </div>
-            </div>
+              </td>}
+            </tr>
           }
-      </app-list-shell>
+      </tbody></app-table></app-list-shell>
     </div>
 
     <app-access-form-modal entity="rol" [open]="showModal()" [data]="formData()"
@@ -146,6 +148,8 @@ export class RolesComponent implements OnInit {
     return this.roles().filter((rol) => `${rol.nombre} ${rol.descripcion ?? ''}`.toLowerCase().includes(term));
   });
 
+  get showActions(): boolean { return ['roles.asignar_permisos', 'roles.editar', 'roles.cambiar_estado'].some(permission => this.auth.can(permission, true)); }
+
   ngOnInit(): void {
     this.load();
     if (this.auth.can('roles.asignar_permisos', true)) this.service.permisos().subscribe({
@@ -194,9 +198,9 @@ export class RolesComponent implements OnInit {
         this.snackbar.success(response.message);
         this.load();
       },
-      error: () => {
+      error: err => {
         this.saving.set(false);
-        this.snackbar.error('No se pudo guardar el rol.');
+        this.snackbar.error(apiError(err, 'No se pudo guardar el rol.'));
       },
     });
   }
@@ -239,9 +243,9 @@ export class RolesComponent implements OnInit {
         this.snackbar.success(response.message);
         this.load();
       },
-      error: () => {
+      error: err => {
         this.savingPermisos.set(false);
-        this.snackbar.error('No se pudieron guardar permisos.');
+        this.snackbar.error(apiError(err, 'No se pudieron guardar permisos.'));
       },
     });
   }
@@ -260,7 +264,7 @@ export class RolesComponent implements OnInit {
         this.snackbar.success(response.message);
         this.load();
       },
-      error: () => this.snackbar.error('No se pudo cambiar el estado.'),
+      error: err => this.snackbar.error(apiError(err, 'No se pudo cambiar el estado.')),
     });
   }
 

@@ -23,7 +23,7 @@ export function occupies(r: Reservation, now: number) {
 }
 export const STATE_LABELS: Record<string, string> = {
   PENDIENTE: 'Pendiente de pago', CONFIRMADA: 'Confirmada', EN_CURSO: 'En curso',
-  FINALIZADA: 'Finalizada', CANCELADA: 'Cancelada', EXPIRADA: 'Retencion vencida',
+  FINALIZADA: 'Finalizada', CANCELADA: 'Cancelada', EXPIRADA: 'Plazo de pago vencido',
 };
 export function calendarEvents(data: Agenda | null, state: string, now = Date.now()): EventInput[] {
   if (!data) return [];

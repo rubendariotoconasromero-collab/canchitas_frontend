@@ -1,4 +1,16 @@
-import { Span } from './reservas.service';
+import { Reservation, Span } from './reservas.service';
+
+export function hasPendingPayment(reservation: Pick<Reservation, 'estado' | 'saldo_pendiente'>): boolean {
+  const balance = Number(reservation.saldo_pendiente);
+  return reservation.estado === 'PENDIENTE' && Number.isFinite(balance) && balance > 0;
+}
+
+export function reservationActionLabel(action: string): string {
+  const labels: Record<string, string> = {RETENER: 'Horario apartado', REPROGRAMAR: 'Reserva reprogramada',
+    CONFIRMAR: 'Reserva confirmada', CANCELAR: 'Reserva cancelada', INICIAR: 'Servicio iniciado',
+    FINALIZAR: 'Servicio finalizado', EXPIRAR: 'Plazo de pago vencido'};
+  return Object.hasOwn(labels, action) ? labels[action] : action;
+}
 
 // Subtract occupied intervals from opening hours; adjacent intervals share no time.
 export function freeIntervals(openings: Span[], occupied: Span[], now: number): Span[] {

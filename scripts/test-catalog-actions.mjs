@@ -29,6 +29,6 @@ assert.equal(component.hasActions({activo:true}),false);
 permissions.push('alcance.global');assert.equal(component.hasActions({activo:true}),true);
 const template=source.match(/template:`([\s\S]*?)`,\s*\}\)/)[1];
 assert.equal(parseTemplate(template,'catalog-actions').errors,null);
-assert.match(template,/@if\(showActions\(\)\)\{<th>Acciones<\/th>\}/);
+assert.match(template,/@if\(showActions\(\)\)\{<th scope="col">Acciones<\/th>\}/);
 assert.match(template,/@if\(hasActions\(row\)\)\{<div class="catalog-actions">/);
 console.log('Catalog actions: read-only cashier, court detail, edit, deactivation, inactive rows, policies and global permissions passed without browser.');

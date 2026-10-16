@@ -1,0 +1,5 @@
+.content-summary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.5rem; margin:0; padding:1.5rem; }
+.content-summary dt { font-size:13px; color:var(--text-600); margin-bottom:.4rem; }
+.content-summary dd { margin:0; overflow-wrap:anywhere; }
+.content-thumbnail { width:96px; height:64px; object-fit:cover; border-radius:4px; }
+@media(max-width:600px) { .content-summary { grid-template-columns:1fr; } }

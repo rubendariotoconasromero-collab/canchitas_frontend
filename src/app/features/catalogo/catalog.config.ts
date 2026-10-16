@@ -11,6 +11,7 @@ export interface Field {
 export interface CatalogConfig {
   endpoint: string; title: string; icon: string; permission: string; global?: boolean;
   fields: Field[]; columns: { key: string; label: string }[]; state?: string; versioned?: boolean; singleton?: boolean;
+  ordered?: boolean; singletonView?: 'fields';
 }
 const days = ['Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo'].map((label, i) => ({label, value: String(i + 1)}));
 const branch: Field = {key:'sucursal',label:'Sucursal',type:'select',lookup:'sucursales',required:true};
@@ -27,6 +28,7 @@ export const CATALOG: Record<string, CatalogConfig> = {
       {key:'telefono',label:'Telefono',sectionBefore:'Contacto'},{key:'correo_publico',label:'Correo publico',type:'email'},
       {key:'sitio_web',label:'Sitio web',type:'url',wide:true},
       {key:'logo_url',label:'URL del logo',type:'url',sectionBefore:'Imagen del negocio'},{key:'portada_url',label:'URL de portada',type:'url'},
+      {key:'archivo',label:'Logo (JPEG, PNG o WebP, hasta 5 MB)',type:'file'},
       {key:'moneda',label:'Moneda',type:'select',initial:'BOB',options:[{value:'BOB',label:'Bolivianos (Bs)'}],sectionBefore:'Publicacion y moneda'},
       {key:'publicado',label:'Publicado',type:'checkbox',initial:false}]},
   sucursales: {endpoint:'sucursales',title:'Sucursales',icon:'location_on',permission:'sucursales',global:true,state:'estado',
@@ -39,13 +41,16 @@ export const CATALOG: Record<string, CatalogConfig> = {
       {key:'longitud',label:'Longitud',type:'number',min:-180,max:180,nullable:true},
       {key:'estado',label:'Activa',type:'checkbox',initial:true}]},
   deportes: {endpoint:'deportes',title:'Deportes',icon:'sports',permission:'deportes',global:true,state:'activo',
-    columns:[{key:'nombre',label:'Nombre'}],fields:[{key:'nombre',label:'Nombre',required:true},active]},
+    columns:[{key:'nombre',label:'Nombre'},{key:'archivo',label:'Imagen'},{key:'descripcion_publica',label:'Descripcion publica'}],fields:[{key:'nombre',label:'Nombre',required:true},
+      {key:'descripcion_publica',label:'Descripcion publica',type:'textarea'},
+      {key:'archivo',label:'Imagen (JPEG, PNG o WebP, hasta 5 MB)',type:'file'},
+      {key:'texto_alternativo',label:'Descripcion de la imagen',wide:true},active]},
   canchas: {endpoint:'canchas',title:'Canchas',icon:'sports_soccer',permission:'canchas',state:'activa',
-    columns:[{key:'nombre',label:'Cancha'},{key:'sucursal_nombre',label:'Sucursal'},{key:'superficie',label:'Tipo de superficie'},
+    columns:[{key:'codigo_correlativo',label:'Codigo'},{key:'nombre',label:'Cancha'},{key:'sucursal_nombre',label:'Sucursal'},{key:'superficie',label:'Tipo de superficie'},
       {key:'dimensiones',label:'Dimensiones'},
       {key:'duracion_minima_minutos',label:'Minimo (min)'},{key:'publicada',label:'Publicada'}],fields:[
       {...branch,sectionBefore:'Identificacion de la cancha'},
-      {key:'codigo',label:'Codigo',required:true},{key:'nombre',label:'Nombre',required:true},
+      {key:'codigo',label:'Referencia interna',required:true},{key:'nombre',label:'Nombre',required:true},
       {key:'descripcion_publica',label:'Descripcion publica',type:'textarea'},
       {key:'superficie',label:'Tipo de superficie',type:'select',options:SURFACE_OPTIONS,sectionBefore:'Superficie y dimensiones',wide:true},
       {key:'ancho_metros',label:'Ancho (m)',type:'number',min:0.01,max:99999.99,step:0.01,nullable:true},
@@ -83,9 +88,9 @@ export const CATALOG: Record<string, CatalogConfig> = {
       {key:'regla_pago',label:'Pago para confirmar'},
       {key:'regla_reembolso',label:'Cancelaciones'},
       {key:'horas_limite_cancelacion',label:'Cancelacion (horas)'},
-      {key:'minutos_retencion',label:'Retencion temporal (minutos)'},
+      {key:'minutos_retencion',label:'Plazo para completar el pago (minutos)'},
       {key:'condiciones',label:'Condiciones'}], fields:[branch,
       {key:'horas_limite_cancelacion',label:'Anticipacion para cancelar (horas)',type:'number',initial:5,min:0,required:true},
-      {key:'minutos_retencion',label:'Retencion tecnica (minutos)',type:'number',nullable:true,min:1},
+      {key:'minutos_retencion',label:'Plazo para completar el pago (minutos)',type:'number',nullable:true,min:1},
       {key:'condiciones',label:'Condiciones',type:'textarea'}]},
 };

@@ -8,7 +8,7 @@ import { AuthService } from '../services/auth.service';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('canchitas_token');
   const api = req.url.startsWith(API_BASE_URL + '/');
-  if (!api || req.url === API_ENDPOINTS.login || req.url === `${API_BASE_URL}/publico/marca/`) {
+  if (!api || req.url === API_ENDPOINTS.login || req.url.startsWith(`${API_BASE_URL}/publico/`)) {
     return next(req);
   }
   const auth = inject(AuthService);

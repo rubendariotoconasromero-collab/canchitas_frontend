@@ -1,0 +1,14 @@
+app-table { display: block; min-width: 0; }
+.app-data-table { width: 100%; margin: 0; font-size: 14px; color: var(--text-700); }
+.app-data-table.table-fixed { table-layout: fixed; }
+.app-data-table > thead > tr > th { background: var(--bg-elevated); color: var(--text-500); font-size: 12px; font-weight: 600; text-transform: uppercase; white-space: nowrap; }
+.app-data-table > :not(caption) > * > * { padding: 14px 16px; vertical-align: middle; border-color: var(--container-border-color); }
+.app-data-table > tbody > tr > td { color: var(--text-700); }
+.app-data-table > tbody > tr:last-child > td { border-bottom: 0; }
+.app-data-table > tbody > tr:hover > td { background: var(--hover-bg); }
+.app-data-table .table-actions { text-align: center; width: 120px; }
+.app-data-table .table-id { color: var(--text-400); font-size: 12px; font-variant-numeric: tabular-nums; }
+.app-data-table .table-muted { color: var(--text-500); }
+.app-data-table .table-bold { font-weight: 600; }
+.app-data-table .table-number { text-align: right; font-variant-numeric: tabular-nums; }
+@media(max-width:600px) { .app-data-table > :not(caption) > * > * { padding: 12px; } }

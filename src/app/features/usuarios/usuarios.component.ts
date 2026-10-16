@@ -2,11 +2,13 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 import { CanDirective } from '../../shared/directives/can.directive';
 import { AuthService } from '../../core/services/auth.service';
 import { ListToolbarComponent } from '../../shared/components/list-toolbar/list-toolbar.component';
+import { TableComponent } from '../../shared/components/table/table.component';
 import { ListShellComponent } from '../../shared/components/list-shell/list-shell.component';
 import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, computed, inject, signal } from '@angular/core';
 
 import { Rol, Sucursal, Usuario } from '../../core/models/auth.model';
 import { SnackbarService } from '../../core/services/snackbar.service';
+import { apiError } from '../../core/utils/api-error';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
@@ -18,7 +20,7 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [PageHeaderComponent, ListToolbarComponent, ListShellComponent, 
+  imports: [TableComponent,PageHeaderComponent, ListToolbarComponent, ListShellComponent,
     ButtonComponent, CanDirective,
     BadgeComponent,
     ConfirmationModalComponent,
@@ -38,21 +40,21 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
       <app-list-toolbar searchLabel="Buscar usuario" entity="usuarios"
         [total]="usuarios().length" [active]="activos()" [(query)]="query" [showRefresh]="true" [loading]="loading()" (refreshed)="load()" />
 
-      <app-list-shell class="usuarios-list" [loading]="loading()" [error]="loadError()"
-        [empty]="filteredUsuarios().length === 0" (retry)="load()">
-        <div class="list-header">
-          <div class="list-col">ID</div>
-          <div class="list-col">Nombre</div>
-          <div class="list-col hide-sm">Correo</div>
-          <div class="list-col hide-sm">Sucursal</div>
-          <div class="list-col text-center">Estado</div>
-          <div class="list-col text-center">Acciones</div>
-        </div>
+      <app-list-shell [loading]="loading()" [error]="loadError()"
+        [empty]="filteredUsuarios().length === 0" (retry)="load()"><app-table label="Usuarios" minWidth="800px" class="usuarios-list">
+        <thead><tr>
+          <th scope="col">ID</th>
+          <th scope="col">Nombre</th>
+          <th scope="col" class="hide-sm">Correo</th>
+          <th scope="col" class="hide-sm">Sucursal</th>
+          <th scope="col" class="text-center">Estado</th>
+          @if(showActions){<th scope="col" class="text-center">Acciones</th>}
+        </tr></thead><tbody>
 
           @for (usuario of filteredUsuarios(); track usuario.id) {
-            <div class="list-row">
-              <div class="list-col list-col-id">#{{ usuario.id }}</div>
-              <div class="list-col">
+            <tr>
+              <td class="table-id">#{{ usuario.id }}</td>
+              <td>
                 <div class="user-cell">
                   <span class="avatar">{{ initials(usuario.nombre) }}</span>
                   <div>
@@ -60,13 +62,13 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
                     <small>{{ permisosResumen(usuario) }}</small>
                   </div>
                 </div>
-              </div>
-              <div class="list-col hide-sm list-col-muted">{{ usuario.correo }}</div>
-              <div class="list-col hide-sm">{{ usuario.alcance_global ? 'Global' : (usuario.sucursal?.nombre || 'Sin sucursal') }}</div>
-              <div class="list-col center-col">
+              </td>
+              <td class="hide-sm table-muted">{{ usuario.correo }}</td>
+              <td class="hide-sm">{{ usuario.alcance_global ? 'Global' : (usuario.sucursal?.nombre || 'Sin sucursal') }}</td>
+              <td class="text-center">
                 <app-badge [active]="usuario.estado" />
-              </div>
-              <div class="list-col list-col-actions">
+              </td>
+              @if(showActions){<td class="table-actions">
                 <app-dropdown align="end" [title]="'Acciones para ' + usuario.nombre">
                   <app-dropdown-item
                     *appCan="'usuarios.asignar_accesos'"
@@ -89,10 +91,10 @@ import { UsuarioPayload, UsuarioService } from './usuario.service';
                     (clicked)="confirmToggle(usuario)"
                   />
                 </app-dropdown>
-              </div>
-            </div>
+              </td>}
+            </tr>
           }
-      </app-list-shell>
+      </tbody></app-table></app-list-shell>
     </div>
 
     <app-usuario-modal
@@ -163,6 +165,8 @@ export class UsuariosComponent implements OnInit {
       `${usuario.nombre} ${usuario.correo} ${usuario.sucursal?.nombre ?? ''}`.toLowerCase().includes(term),
     );
   });
+
+  get showActions(): boolean { return ['usuarios.asignar_accesos', 'usuarios.editar', 'usuarios.cambiar_estado'].some(permission => this.auth.can(permission)); }
 
   ngOnInit(): void {
     this.load();
@@ -258,9 +262,9 @@ export class UsuariosComponent implements OnInit {
         this.snackbar.success(response.message);
         this.load();
       },
-      error: () => {
+      error: err => {
         this.savingAsignaciones.set(false);
-        this.snackbar.error('No se pudieron guardar los accesos.');
+        this.snackbar.error(apiError(err, 'No se pudieron guardar los accesos.'));
       },
     });
   }
@@ -282,7 +286,7 @@ export class UsuariosComponent implements OnInit {
         this.snackbar.success(response.message);
         this.load();
       },
-      error: () => this.snackbar.error('No se pudo cambiar el estado.'),
+      error: err => this.snackbar.error(apiError(err, 'No se pudo cambiar el estado.')),
     });
   }
 
@@ -302,12 +306,6 @@ export class UsuariosComponent implements OnInit {
   }
 
   private formatError(err: any): string {
-    const data = err?.error;
-    if (!data || typeof data === 'string') {
-      return 'No se pudo guardar el usuario.';
-    }
-    const firstKey = Object.keys(data)[0];
-    const firstValue = data[firstKey];
-    return Array.isArray(firstValue) ? firstValue[0] : 'Revisa los datos ingresados.';
+    return apiError(err, 'No se pudo guardar el usuario.');
   }
 }

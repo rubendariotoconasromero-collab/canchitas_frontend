@@ -33,6 +33,6 @@ assert.equal(filtered.find(e=>e.id==='reserva-2').display, 'auto');
 assert.equal(occupies(data.reservas[1], now), false);
 data.reservas[2].retencion_hasta = '2026-10-08T11:00:00Z';
 assert.equal(occupies(data.reservas[2], now), false);
-assert.equal(calendarEvents(data, '', now).find(e=>e.id==='reserva-3').extendedProps.label, 'Retencion vencida');
+assert.equal(calendarEvents(data, '', now).find(e=>e.id==='reserva-3').extendedProps.label, 'Plazo de pago vencido');
 assert.equal(calendarEvents(null, '', now).length, 0);
 console.log('20 comprobaciones de calendario aprobadas, sin navegador.');

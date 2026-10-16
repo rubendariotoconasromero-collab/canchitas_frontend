@@ -6,7 +6,7 @@ const STATES: Record<string, BadgeAppearance> = {
   EN_CURSO: {label:'En curso',tone:'info',icon:'sports_soccer'},
   FINALIZADA: {label:'Finalizada',tone:'neutral',icon:'check_circle'},
   CANCELADA: {label:'Cancelada',tone:'danger',icon:'cancel'},
-  EXPIRADA: {label:'Retencion vencida',tone:'neutral',icon:'schedule'},
+  EXPIRADA: {label:'Plazo de pago vencido',tone:'neutral',icon:'schedule'},
   ABIERTO: {label:'Abierto',tone:'success',icon:'check_circle'},
   CERRADO: {label:'Cerrado',tone:'neutral',icon:'lock'},
 };

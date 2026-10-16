@@ -1,0 +1,20 @@
+:host { display: block; }
+.public-site { --button-primary-color:#d4ea16; --button-primary-hover-color:#bfd115; --button-primary-text:#171717; --primary:#171717; --primary-lighter:#f0f5c6; --accent:#d4ea16; --accent-dark:#647100; --text-700:#171717; --text-600:#41463d; --typography-color:#171717; --border-color:#dce0d5; --bg-surface:#fff; --bg-elevated:#f3f4f0; min-height: 100dvh; background: #fff; color: var(--text-700); display: flex; flex-direction: column; }
+.public-site main { flex: 1; }
+.public-site { --primary-dark:#0a0a0a; --primary-light:#dce0d5; --bg-page:#f3f4f0; --text-800:#171717; --text-500:#575d52; --text-400:#646b60; --container-border-color:#dce0d5; --input-field-focus-color:#647100; --focus-ring:rgba(100,113,0,.2); }
+.public-width { width: min(1180px, calc(100% - 3rem)); margin-inline: auto; }
+.public-nav { background: #171717; color:#fff; border-bottom: 3px solid var(--button-primary-color); }
+.public-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1rem; }
+.public-brand { display: flex; align-items: center; gap: .8rem; text-decoration: none; color: inherit; font-size: 18px; }
+.public-brand strong { overflow-wrap: anywhere; }
+.public-brand img { object-fit: contain; flex-shrink: 0; }
+.public-nav nav { display: flex; gap: 1.5rem; align-items: center; }
+.public-nav nav a { text-decoration: none; color: inherit; font-size: 14px; padding-block: .5rem; border-bottom: 2px solid transparent; }
+.public-nav nav a.selected { border-color: var(--button-primary-color); }
+.staff-link { display: flex; align-items: center; gap: .3rem; }
+.staff-link .material-symbols-outlined { font-size: 16px; }
+.public-footer { background: #171717; color: white; padding: 1.5rem 0; border-top:3px solid #c5a028; }
+.public-footer nav { display:flex; flex-wrap:wrap; gap:1rem; }
+.public-footer nav a { color:#d4ea16; text-decoration:none; font-size:12px; }
+.public-footer > div { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: 13px; }
+@media(max-width:760px) { .public-width { width: calc(100% - 2rem); } .public-nav-inner { flex-wrap: wrap; } .public-nav nav { gap: 1rem; flex-wrap: wrap; } .public-brand { font-size: 16px; } }

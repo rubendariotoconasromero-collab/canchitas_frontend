@@ -1,14 +1,15 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ReservasService, Agenda, Branch, CourtLink, CourtOption, Cliente, Reservation, Block, Quote, Span, apiError } from './reservas.service';
 import { RESERVAS_UI } from './reservas-ui';
-import { freeIntervals, localDate, shiftDay } from './agenda.utils';
+import { freeIntervals, hasPendingPayment, localDate, reservationActionLabel, shiftDay } from './agenda.utils';
 import { ClienteEditorComponent } from './cliente-editor.component';
 import { ReservationCalendarComponent } from './reservation-calendar.component';
 import { PaymentModalComponent } from '../caja/payment-modal.component';
 import { calendarRange, moveCalendarDay, CalendarView, CalendarSelection } from './reservation-calendar.utils';
+import { SnackbarService } from '../../core/services/snackbar.service';
 
 @Component({selector:'app-agenda', imports:[...RESERVAS_UI, ClienteEditorComponent, ReservationCalendarComponent,PaymentModalComponent], styleUrls:['./reservas.component.css','./agenda.component.css'], template:`
   <div class="main-content agenda-page">
@@ -38,13 +39,13 @@ import { calendarRange, moveCalendarDay, CalendarView, CalendarSelection } from 
         <div class="segmented" role="group" aria-label="Periodo de agenda"><button type="button" [class.selected]="calendarMode ? calendarView==='day' : days===1" [attr.aria-pressed]="calendarMode ? calendarView==='day' : days===1" (click)="setPeriod('day')">Dia</button><button type="button" [class.selected]="calendarMode ? calendarView==='week' : days===7" [attr.aria-pressed]="calendarMode ? calendarView==='week' : days===7" (click)="setPeriod('week')">Semana</button>@if(calendarMode) {<button type="button" [class.selected]="calendarView==='month'" [attr.aria-pressed]="calendarView==='month'" (click)="setPeriod('month')">Mes</button>}</div>
       </div>
     </div>
-    @if(message()) { <div class="alert alert-danger" role="alert">{{message()}}</div> }
+    <app-form-error [message]="message()" />
     @if(calendarMode) {
       @if(loading()) {<p class="calendar-status" role="status">Actualizando calendario...</p>}
       @if(error()) {<div class="alert alert-danger" role="alert">{{error()}} <app-button variant="outline-secondary" size="sm" icon="refresh" title="Reintentar" (clicked)="load()" /></div>}
       @defer (when calendarMode) {
         <app-reservation-calendar [data]="agenda()" [date]="day" [view]="calendarView" [zone]="calendarZone" [state]="state" [canCreate]="auth.can('reservas.crear')" [disabled]="loading() || !!error() || saving() || !agenda()?.canchas?.length" (dayChosen)="calendarDay($event)" (selected)="calendarSelect($event)" (eventChosen)="calendarEvent($event)" />
-      } @placeholder {<p role="status">Cargando calendario...</p>}
+      } @placeholder {<app-loading message="Cargando calendario..." />}
       @if(!loading() && !error() && !agenda()?.canchas?.length) {<p class="calendar-status" role="status">No hay canchas para esta seleccion.</p>}
     } @else if(loading() || error() || !agenda()?.canchas?.length) {
       <app-list-shell [loading]="loading()" [error]="error()" [empty]="!agenda()?.canchas?.length" emptyMessage="No hay canchas para esta seleccion." (retry)="load()" />
@@ -52,46 +53,46 @@ import { calendarRange, moveCalendarDay, CalendarView, CalendarSelection } from 
       <section class="agenda-section" aria-labelledby="availability-title">
         <header class="agenda-section-heading"><div><h3 id="availability-title">Disponibilidad</h3><span>{{data.canchas.length}} canchas</span></div></header>
         <app-list-shell>
-          <table class="table agenda-table availability-table"><thead><tr><th>Cancha</th><th>Horario disponible</th></tr></thead><tbody>
+          <app-table class="agenda-table availability-table" label="Disponibilidad de canchas" [fixed]="true" minWidth="0"><thead><tr><th scope="col">Cancha</th><th scope="col">Horario disponible</th></tr></thead><tbody>
             @for(c of data.canchas;track c.id) {
               <tr><td class="court-cell"><div class="court-identity"><span class="material-symbols-outlined" aria-hidden="true">sports_soccer</span><strong>{{c.nombre}}</strong></div></td>
                 <td class="slots-cell">
                   @let slots = free(c.id);
                   @if(c.activa && slots.length) {
-                    <details [open]="days===1"><summary>{{slots.length}} {{slots.length===1 ? 'intervalo disponible' : 'intervalos disponibles'}}</summary>
+                    <details [open]="days===1"><summary>{{slots.length}} {{slots.length===1 ? 'horario disponible' : 'horarios disponibles'}}</summary>
                       <div class="agenda-slots">@for(slot of slots;track slot.inicio) {<span class="agenda-slot"><span class="material-symbols-outlined" aria-hidden="true">schedule</span><span>{{slotLabel(slot.inicio)}} - {{slotLabel(slot.fin)}}</span></span>}</div>
                     </details>
                   } @else { <span class="availability-status" [class.off]="!c.activa"><span class="material-symbols-outlined" aria-hidden="true">{{c.activa ? 'schedule' : 'toggle_off'}}</span>{{availabilityStatus(c.id,c.activa)}}</span> }
                 </td>
               </tr>
             }
-          </tbody></table>
+          </tbody></app-table>
         </app-list-shell>
       </section>
       <section class="agenda-section" aria-labelledby="reservations-title">
         <header class="agenda-section-heading"><div><h3 id="reservations-title">Reservas</h3><span>{{reservations.length}} registros</span></div></header>
         <app-list-shell [empty]="!reservations.length" [emptyMessage]="state ? 'No hay reservas con este estado en el periodo.' : 'No hay reservas para el periodo seleccionado.'">
-          <table class="table agenda-table"><thead><tr><th>Horario</th><th>Cancha</th><th>Cliente</th><th>Estado</th><th class="amount-cell">Total</th><th class="action-cell">Acciones</th></tr></thead><tbody>
+          <app-table class="agenda-table" label="Reservas"><thead><tr><th scope="col">Horario</th><th scope="col">Cancha</th><th scope="col">Cliente</th><th scope="col">Estado</th><th scope="col" class="amount-cell">Total</th><th scope="col" class="action-cell">Acciones</th></tr></thead><tbody>
             @for(r of reservations;track r.id) {
-              <tr><td><strong>{{format(r.detalle.inicio)}}</strong><small>Hasta {{format(r.detalle.fin)}}</small></td><td class="name-cell"><strong>{{r.detalle.cancha_nombre}}</strong><small>{{r.detalle.deporte_nombre}}</small></td><td class="name-cell">{{r.cliente_snapshot.nombre}}</td>
+              <tr><td><strong>{{format(r.detalle.inicio)}}</strong><small>Hasta {{format(r.detalle.fin)}}</small><small>{{r.codigo_correlativo || r.codigo}}</small></td><td class="name-cell"><strong>{{r.detalle.cancha_nombre}}</strong><small>{{r.detalle.deporte_nombre}}</small></td><td class="name-cell">{{r.cliente_snapshot.nombre}}</td>
                 <td><app-badge [state]="r.estado" /></td><td class="amount-cell">Bs {{r.total}}</td><td class="action-cell"><app-button icon="visibility" title="Ver reserva" variant="outline-secondary" size="sm" (clicked)="detail.set(r)" /></td>
               </tr>
             }
-          </tbody></table>
+          </tbody></app-table>
         </app-list-shell>
       </section>
       @if(data.bloqueos.length) {
         <section class="agenda-section" aria-labelledby="blocks-title"><header class="agenda-section-heading"><div><h3 id="blocks-title"><span class="material-symbols-outlined" aria-hidden="true">lock</span>Bloqueos operativos</h3><span>{{data.bloqueos.length}} bloqueos</span></div></header>
-          <app-list-shell><table class="table agenda-table"><thead><tr><th>Cancha</th><th>Horario</th><th>Motivo</th><th class="action-cell">Acciones</th></tr></thead><tbody>
-            @for(b of data.bloqueos;track b.id) {<tr><td class="name-cell"><strong>{{b.cancha_nombre}}</strong></td><td>{{format(b.inicio)}}<small>Hasta {{format(b.fin)}}</small></td><td class="name-cell">{{b.motivo}}</td><td class="action-cell">@if(auth.can('bloqueos.liberar')) {<app-button icon="lock" size="sm" variant="outline-secondary" (clicked)="askRelease(b)">Liberar</app-button>}</td></tr>}
-          </tbody></table></app-list-shell>
+          <app-list-shell><app-table class="agenda-table" label="Bloqueos operativos"><thead><tr><th scope="col">Cancha</th><th scope="col">Horario</th><th scope="col">Motivo</th>@if(auth.can('bloqueos.liberar')){<th scope="col" class="action-cell">Acciones</th>}</tr></thead><tbody>
+            @for(b of data.bloqueos;track b.id) {<tr><td class="name-cell"><strong>{{b.cancha_nombre}}</strong></td><td>{{format(b.inicio)}}<small>Hasta {{format(b.fin)}}</small></td><td class="name-cell">{{b.motivo}}</td>@if(auth.can('bloqueos.liberar')) {<td class="action-cell"><app-button icon="lock" size="sm" variant="outline-secondary" (clicked)="askRelease(b)">Liberar</app-button></td>}</tr>}
+          </tbody></app-table></app-list-shell>
         </section>
       }
     }
   </div>
-  <app-modal [open]="!!mode() && !clientEditorOpen()" [title]="mode()==='block' ? 'Bloqueo de cancha' : mode()==='move' ? 'Reprogramar retencion' : 'Nueva reserva'" icon="calendar_month" size="wide" [busy]="saving()" (closed)="closeForm()">
-    <form #form="ngForm" (ngSubmit)="save()"><div class="modal-body operation-form">
-      @if(formError()) { <div class="alert alert-danger" role="alert">{{formError()}}</div> }
+  <app-modal [open]="!!mode() && !clientEditorOpen()" [title]="mode()==='block' ? 'Bloqueo de cancha' : mode()==='move' ? 'Reprogramar reserva pendiente de pago' : 'Nueva reserva'" icon="calendar_month" size="wide" [busy]="saving()" (closed)="closeForm()">
+    <form #form="ngForm" (ngSubmit)="form.valid && save()" novalidate><div class="modal-body operation-form">
+      <app-form-error [message]="formError()" [active]="!!mode() && !clientEditorOpen()" />
       @if(mode()==='reserve') {
         <app-search-select name="cliente" label="Cliente" placeholder="Buscar cliente" [options]="clientOptions" [(ngModel)]="draft.cliente" [required]="true" (ngModelChange)="invalidateQuote()" />
         @if(auth.can('clientes.crear')) { <div><app-button variant="outline-secondary" icon="person_add" (clicked)="clientEditorOpen.set(true)">Nuevo cliente</app-button></div> }
@@ -106,15 +107,16 @@ import { calendarRange, moveCalendarDay, CalendarView, CalendarSelection } from 
       } @else { <app-input name="duration" type="number" label="Duracion (minutos)" [min]="minimum" [max]="1440" [(ngModel)]="draft.duracion_minutos" [required]="true" (ngModelChange)="invalidateQuote()" /> }
       <app-input name="notas" [label]="mode()==='block' ? 'Motivo del bloqueo' : 'Observaciones'" [(ngModel)]="draft.notas" [required]="mode()==='block'" />
       @if(mode()==='reserve'||mode()==='move') { <app-button variant="outline-primary" icon="payments" [disabled]="form.invalid || quoting()" [loading]="quoting()" (clicked)="calculate()">Cotizar</app-button> }
-      @if(quotation();as q) { <section class="quote-summary"><strong>Bs {{q.total}}</strong><p class="mb-2">{{q.minutos}} minutos · Retencion: {{q.retencion_minutos}} minutos</p>@for(part of q.desglose;track $index) { <div>{{part.nombre}} · {{part.minutos}} min · Bs {{part.importe}}</div> }</section> }
-    </div><div class="modal-footer"><app-button variant="outline-secondary" (clicked)="closeForm()">Cancelar</app-button><app-button type="submit" icon="save" [loading]="saving()" [disabled]="form.invalid || (mode()!=='block' && !quotation())">{{mode()==='reserve' ? 'Retener horario' : 'Guardar'}}</app-button></div></form>
+      @if(quotation();as q) { <section class="quote-summary"><strong>Bs {{q.total}}</strong><p class="mb-2">{{q.minutos}} minutos · Plazo para completar el pago: {{q.retencion_minutos}} minutos</p>@for(part of q.desglose;track $index) { <div>{{part.nombre}} · {{part.minutos}} min · Bs {{part.importe}}</div> }</section> }
+    </div><div class="modal-footer"><app-button variant="outline-secondary" (clicked)="closeForm()">Cancelar</app-button><app-button type="submit" icon="save" [loading]="saving()" [disabled]="form.invalid || (mode()!=='block' && !quotation())">{{mode()==='reserve' ? 'Apartar horario' : 'Guardar'}}</app-button></div></form>
   </app-modal>
   <app-cliente-editor [open]="clientEditorOpen()" [branches]="branches" [branch]="branch" [fixedBranch]="true" (closed)="clientEditorOpen.set(false)" (saved)="clientCreated($event)" />
   <app-modal [open]="!!detail()" title="Detalle de reserva" icon="calendar_month" size="wide" (closed)="detail.set(null)">
     @if(detail();as r) { <div class="modal-body operation-form">
+      <p class="mb-0"><strong>Reserva {{r.codigo_correlativo || r.codigo}}</strong></p>
       <app-badge [state]="r.estado" />
       <div class="detail-grid"><div><small>Cliente</small><strong>{{r.cliente_snapshot.nombre}}</strong><br>{{r.cliente_snapshot.telefono}}</div><div><small>Cancha / deporte</small>{{r.detalle.cancha_nombre}} / {{r.detalle.deporte_nombre}}</div><div><small>Horario</small>{{format(r.detalle.inicio)}} - {{format(r.detalle.fin)}}</div><div><small>Total / pagado</small>Bs {{r.total}} / Bs {{r.total_pagado}}</div></div>
-      @if(r.estado==='PENDIENTE') { <div class="alert alert-warning mb-0">Pendiente de pago total. Retencion hasta {{format(r.retencion_hasta)}}.</div> }
+      @if(pendingPayment(r)) { <div class="alert alert-warning mb-0" role="status">Horario apartado temporalmente. Completa el pago total para confirmar la reserva. Plazo para pagar: {{format(r.retencion_hasta)}}.</div> }
       <p class="mb-0">Saldo pendiente: Bs {{r.saldo_pendiente}}</p>
       <p class="mb-0">Cancelacion: al menos {{r.horas_cancelacion}} horas antes. Sin reembolsos.</p>
       @if(r.condiciones) { <p>{{r.condiciones}}</p> }
@@ -127,13 +129,13 @@ import { calendarRange, moveCalendarDay, CalendarView, CalendarSelection } from 
         @if(r.estado==='CONFIRMADA' && auth.can('reservas.iniciar')) { <app-button icon="sports_soccer" (clicked)="change(r,'iniciar')">Iniciar servicio</app-button> }
         @if(r.estado==='EN_CURSO' && auth.can('reservas.finalizar')) { <app-button icon="check_circle" (clicked)="change(r,'finalizar')">Finalizar servicio</app-button> }
       </div>
-      <h3 class="h6 mb-0">Historial</h3><ul class="history-list">@for(h of r.historial;track $index) { <li>{{h.accion}}<small>{{format(h.created_at)}} · {{h.actor_nombre || 'Sistema'}}</small></li> }</ul>
+      <h3 class="h6 mb-0">Historial</h3><ul class="history-list">@for(h of r.historial;track $index) { <li>{{actionLabel(h.accion)}}<small>{{format(h.created_at)}} · {{h.actor_nombre || 'Sistema'}}</small></li> }</ul>
     </div> }
   </app-modal>
-  <app-payment-modal [reservation]="paymentTarget()" (closed)="paymentTarget.set(null)" (paid)="load()" />
+  <app-payment-modal [reservation]="paymentTarget()" (closed)="paymentTarget.set(null)" (paid)="reservationPaid()" />
   <app-modal [open]="!!confirmation()" title="Confirmar operacion" icon="warning" [busy]="saving()" (closed)="confirmation.set(null)">
     <div class="modal-body operation-form">
-      @if(formError()) { <div class="alert alert-danger" role="alert">{{formError()}}</div> }
+      <app-form-error [message]="formError()" [active]="!!confirmation()" />
       <p>{{confirmation()?.kind==='cancel' ? 'La reserva sera cancelada. No se realizara ningun reembolso.' : 'La cancha volvera a estar disponible durante este intervalo.'}}</p>
       @if(confirmation()?.kind==='cancel') { <app-input label="Motivo de cancelacion" [(ngModel)]="reason" [required]="true" /> }
     </div><div class="modal-footer"><app-button variant="outline-secondary" (clicked)="confirmation.set(null)">Volver</app-button><app-button variant="danger" [disabled]="confirmation()?.kind==='cancel' && !reason.trim()" [loading]="saving()" (clicked)="confirm()">Confirmar</app-button></div>
@@ -143,6 +145,16 @@ import { calendarRange, moveCalendarDay, CalendarView, CalendarSelection } from 
   </app-modal>
 `})
 export class AgendaComponent {
+  private readonly snackbar=inject(SnackbarService);
+  private pendingPaymentNotice?: number;
+  readonly pendingPayment = hasPendingPayment;
+  readonly actionLabel = reservationActionLabel;
+  reservationPaid() {
+    if(this.pendingPaymentNotice !== undefined) this.snackbar.dismiss(this.pendingPaymentNotice);
+    this.pendingPaymentNotice = undefined;
+    this.detail.set(null);
+    this.load();
+  }
   readonly paymentTarget=signal<Reservation|null>(null);
   readonly DateNow=Date.now;
   readonly timestamp=Date.parse;
@@ -177,19 +189,27 @@ export class AgendaComponent {
   get clientOptions(){return [{value:'sin-cliente',label:'Sin cliente registrado'},...this.clients.filter(x=>x.activo && x.sucursal===Number(this.branch)).map(x=>({value:String(x.id),label:`${x.nombre} · ${x.telefono}${x.documento ? ' · ' + x.documento : ''}`}))];}
   get minimum(){return this.links.find(x=>x.id===Number(this.draft.cancha_deporte))?.minutos || 60;}
   get reservations(){return (this.agenda()?.reservas || []).filter(x=>!this.state || x.estado===this.state).sort((a,b)=>a.detalle.inicio.localeCompare(b.detalle.inicio));}
+  private navigationSubscription?:Subscription;
+  private noticeVersion=0;
+  ngOnDestroy(){this.navigationSubscription?.unsubscribe();this.noticeVersion++;this.sequence++;}
   constructor(){
     this.api.options().subscribe({next: data=>{
       this.branches=data.sucursales;this.courts=data.canchas;this.links=data.canchas_deportes;
-      const params=this.route.snapshot.queryParamMap;
-      const selected=this.branches.find(branch=>String(branch.id)===params.get('sucursal'));
-      this.branch=String((selected??this.branches[0])?.id??'');this.branchChanged();
-      if(params.get('nueva')==='1'){
-        if(this.branch && this.auth.can('reservas.crear'))this.openForm('reserve');
-        void this.router.navigate([], {relativeTo:this.route,queryParams:{nueva:null},queryParamsHandling:'merge',replaceUrl:true});
-      }
+      this.navigationSubscription=this.route.queryParamMap.subscribe(params=>{
+        const requestedDay=params.get('fecha');
+        if(requestedDay && /^\d{4}-\d{2}-\d{2}$/.test(requestedDay) && !Number.isNaN(Date.parse(requestedDay+'T12:00:00Z')))this.day=requestedDay;
+        const selected=this.branches.find(branch=>String(branch.id)===params.get('sucursal'));
+        this.branch=String((selected??this.branches.find(b=>String(b.id)===this.branch)??this.branches[0])?.id??'');this.branchChanged();
+        const version=++this.noticeVersion, id=Number(params.get('reserva'));
+        if(Number.isInteger(id)&&id>0){this.detail.set(null);this.api.reservation(id).subscribe({next:r=>{if(version===this.noticeVersion)this.detail.set(r);},error:e=>{if(version===this.noticeVersion)this.error.set(apiError(e));}});}
+        if(params.get('nueva')==='1'){
+          if(this.branch && this.auth.can('reservas.crear'))this.openForm('reserve');
+          void this.router.navigate([], {relativeTo:this.route,queryParams:{nueva:null},queryParamsHandling:'merge',replaceUrl:true});
+        }
+      });
     },error:e=>this.error.set(apiError(e))});
   }
-  stateLabel(state:string){return ({PENDIENTE:'Pendiente de pago',CONFIRMADA:'Confirmada',EN_CURSO:'En curso',FINALIZADA:'Finalizada',CANCELADA:'Cancelada',EXPIRADA:'Retencion vencida'} as Record<string,string>)[state]||state;}
+  stateLabel(state:string){return ({PENDIENTE:'Pendiente de pago',CONFIRMADA:'Confirmada',EN_CURSO:'En curso',FINALIZADA:'Finalizada',CANCELADA:'Cancelada',EXPIRADA:'Plazo de pago vencido'} as Record<string,string>)[state]||state;}
   get periodLabel(){
     if(!this.day)return 'Seleccionar fecha';
     const label=(day:string)=>new Intl.DateTimeFormat('es-BO',{timeZone:'UTC',day:'numeric',month:'long',year:'numeric'}).format(new Date(day+'T12:00:00Z'));
@@ -257,11 +277,19 @@ export class AgendaComponent {
     if(this.saving() || (this.mode()!=='block'&&!this.quotation()))return;
     this.saving.set(true);this.formError.set('');
     const request: Observable<unknown>=this.mode()==='block'?this.api.block({...this.intervalData(),cancha:Number(this.draft.cancha),motivo:this.draft.notas}):this.mode()==='move'?this.api.change(this.moving!,'reprogramar',{...this.intervalData(),total_esperado:this.quotation()!.total}):this.api.reserve({...this.bookingData(),total_esperado:this.quotation()!.total});
-    request.subscribe({next:result=>{const collect=this.mode()==='reserve'&&this.auth.can('caja.cobrar');this.saving.set(false);this.mode.set('');this.detail.set(null);this.load();if(collect)this.paymentTarget.set(result as Reservation);},error:e=>{this.saving.set(false);this.formError.set(apiError(e));if(this.mode()==='reserve'||this.mode()==='move')this.invalidateQuote();}});
+    request.subscribe({next:result=>{
+      const mode=this.mode(), reservation=result as Reservation;
+      const pending=mode==='reserve' && hasPendingPayment(reservation);
+      const collect=pending && this.auth.can('caja.cobrar');
+      if(this.pendingPaymentNotice !== undefined)this.snackbar.dismiss(this.pendingPaymentNotice);
+      const notice=this.snackbar.success(mode==='block' ? 'Bloqueo de cancha registrado correctamente.' : mode==='move' ? 'Reserva reprogramada correctamente.' : pending ? 'Horario apartado temporalmente. Completa el pago total para confirmar la reserva.' : reservation.estado==='CONFIRMADA' ? 'Reserva confirmada correctamente.' : 'Reserva registrada correctamente.');
+      this.pendingPaymentNotice=pending ? notice : undefined;
+      this.saving.set(false);this.mode.set('');this.detail.set(null);this.load();if(collect)this.paymentTarget.set(reservation);
+    },error:e=>{this.saving.set(false);this.formError.set(apiError(e));if(this.mode()==='reserve'||this.mode()==='move')this.invalidateQuote();}});
   }
   openMove(r:Reservation){this.moving=r.id;this.detail.set(null);this.formError.set('');this.invalidateQuote();const time=(value:string)=>new Intl.DateTimeFormat('en-GB',{timeZone:r.detalle.zona_horaria,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(value));const date=localDate(new Date(r.detalle.inicio),r.detalle.zona_horaria);this.draft={fecha:date,hora_inicio:time(r.detalle.inicio),hora_fin:time(r.detalle.fin),cruza_medianoche:date!==localDate(new Date(r.detalle.fin),r.detalle.zona_horaria),alquiler_inmediato:false,notas:''};this.mode.set('move');}
   askCancel(r:Reservation){this.detail.set(null);this.reason='';this.formError.set('');this.confirmation.set({kind:'cancel',id:r.id});}
   askRelease(b:Block){this.formError.set('');this.confirmation.set({kind:'release',id:b.id});}
-  confirm(){const action=this.confirmation();if(!action)return;this.saving.set(true);const request:Observable<unknown>=action.kind==='cancel'?this.api.change(action.id,'cancelar',{motivo:this.reason}):this.api.release(action.id);request.subscribe({next:()=>{this.saving.set(false);this.confirmation.set(null);this.load();},error:e=>{this.saving.set(false);this.formError.set(apiError(e));}});}
-  change(r:Reservation,action:string){this.message.set('');this.detail.set(null);this.api.change(r.id,action).subscribe({next:()=>this.load(),error:e=>this.message.set(apiError(e))});}
+  confirm(){const action=this.confirmation();if(!action)return;this.saving.set(true);const request:Observable<unknown>=action.kind==='cancel'?this.api.change(action.id,'cancelar',{motivo:this.reason}):this.api.release(action.id);request.subscribe({next:()=>{this.snackbar.success(action.kind==='cancel' ? 'Reserva cancelada correctamente. No se realizan reembolsos.' : 'Bloqueo liberado correctamente.');this.saving.set(false);this.confirmation.set(null);this.load();},error:e=>{this.saving.set(false);this.formError.set(apiError(e));}});}
+  change(r:Reservation,action:string){this.message.set('');this.detail.set(null);this.api.change(r.id,action).subscribe({next:()=>{this.snackbar.success(action==='iniciar' ? 'Servicio iniciado correctamente.' : action==='finalizar' ? 'Servicio finalizado correctamente.' : 'Reserva confirmada correctamente.');this.load();},error:e=>this.message.set(apiError(e))});}
 }

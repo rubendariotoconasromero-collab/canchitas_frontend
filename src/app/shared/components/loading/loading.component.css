@@ -1,0 +1,7 @@
+:host { display: inline-flex; min-width: 0; }
+.loading-content { display: inline-flex; align-items: center; gap: .75rem; min-width: 0; color: inherit; font-size: var(--text-sm, 14px); line-height: 1.5; }
+.loading-ring { width: 24px; height: 24px; flex: 0 0 24px; box-sizing: border-box; border: 3px solid rgba(184, 141, 31, .2); border-top-color: var(--button-primary-color, #d6a922); border-right-color: var(--button-primary-color, #d6a922); border-radius: 50%; animation: loading-spin .8s linear infinite; }
+.loading-label { overflow-wrap: anywhere; min-width: 0; }
+.loading-compact .loading-ring { width: 16px; height: 16px; flex-basis: 16px; border-width: 2px; border-color: currentColor; border-bottom-color: transparent; }
+@keyframes loading-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .loading-ring { animation: none; } }

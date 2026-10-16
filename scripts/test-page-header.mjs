@@ -75,7 +75,7 @@ function audit(node){
   }
   ts.forEachChild(node,audit);
 }
-audit(routeAst);assert.equal(audited.length,15,'All 14 administrative routes and the access-error screen must be audited');
+audit(routeAst);assert.equal(audited.length,24,'Administrative, reports, audit, public history/detail/tracking and access-error screens must be audited');
 
 class Auth{}
 let permissions=[];
@@ -85,11 +85,11 @@ const guardExports={};
 const guardSource=readFileSync(new URL('core/guards/permission.guard.ts',appBase),'utf8');
 vm.runInNewContext(ts.transpileModule(guardSource,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,
   {exports:guardExports,require:name=>name==='@angular/core'?{inject:token=>token===Router?guardRouter:auth}:name==='@angular/router'?{Router}:name==='rxjs'?rxjs:{AuthService:Auth}});
-for(const [allowed,expected] of [[['dashboard.ver'],true],[['reservas.ver'],'/agenda'],[['caja.ver'],'/caja'],[['clientes.ver'],'/clientes'],[[],'/sin-acceso']]){
+for(const [allowed,expected] of [[['dashboard.ver'],true],[['reservas.ver'],'/agenda'],[['caja.ver'],'/caja'],[['clientes.ver'],'/clientes'],[['solicitudes.ver'],'/solicitudes'],[[],'/sin-acceso']]){
   permissions=allowed;
   let result;
   guardExports.permissionGuard({data:{permission:'dashboard.ver'}}).subscribe(value=>result=value);
   assert.equal(result,expected,'Back fallback must respect current permissions');
 }
 console.log('Page headers: internal history, direct entry fallback, query cleanup, logout reset, explicit parent routes and projected actions passed without browser.');
-console.log('All 15 administrative/error screens use shared headers; Dashboard fallback verified with actual permission guard and RxJS.');
+console.log('All 24 routed administrative/public/error screens use shared headers; Dashboard fallback verified with actual permission guard and RxJS.');

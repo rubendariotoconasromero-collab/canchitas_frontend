@@ -22,7 +22,7 @@ import { apiError } from '../reservas/reservas.service';
         @if(data();as d){<small>Actualizado: {{date(d.actualizado_en)}}</small>}
       </div>
       @if(error()){<div class="alert alert-danger" role="alert">{{error()}}</div>}
-      @if(loading()){<p class="dashboard-status" role="status">Cargando resumen...</p>}
+      @if(loading()){<div class="dashboard-status"><app-loading message="Cargando resumen..." /></div>}
       @if(data();as d){
         @if(d.sucursales.length>1){<app-list-toolbar label="Sucursal del resumen" [searchEnabled]="false"><app-select toolbar-filter label="Sucursal" [options]="branchOptions" [(ngModel)]="branch" (ngModelChange)="load()" /></app-list-toolbar>}
         <nav class="dashboard-actions" aria-label="Accesos operativos">
@@ -31,6 +31,7 @@ import { apiError } from '../reservas/reservas.service';
           @if(auth.can('reservas.ver')){<app-button-link route="/agenda" [queryParams]="{sucursal:branch}" variant="outline-secondary" icon="calendar_month">Agenda</app-button-link>}
           @if(auth.can('clientes.ver')){<app-button-link route="/clientes" [queryParams]="{sucursal:branch}" variant="outline-secondary" icon="contact_phone">Clientes</app-button-link>}
           @if(auth.can('usuarios.ver')){<app-button-link route="/usuarios" variant="outline-secondary" icon="group">Usuarios</app-button-link>}
+          @if(auth.can('reportes.ver')){<app-button-link route="/reportes" [queryParams]="{sucursal:branch}" variant="outline-secondary" icon="space_dashboard">Reportes</app-button-link>}
         </nav>
         @if(!d.sucursal){<p class="dashboard-status">No hay una sucursal activa disponible.</p>}
         @if(d.caja;as c){
@@ -52,9 +53,9 @@ import { apiError } from '../reservas/reservas.service';
             <section class="dashboard-section"><h3>{{d.perfil==='administrador'?'Turnos abiertos':'Mis turnos abiertos'}}</h3>
               @if(!c.cajas_disponibles){<p class="dashboard-status">No hay cajas habilitadas en esta sucursal. El administrador debe crear una caja antes de comenzar a cobrar.</p>}
               @else if(!c.turnos.length){<p class="dashboard-status">No hay un turno abierto {{d.perfil==='administrador'?'en esta sucursal':'a tu nombre'}}.</p>}
-              @else{<app-list-shell><div class="dashboard-table-wrap"><table class="table"><thead><tr><th>Caja</th><th>Responsable</th><th>Apertura</th><th>Monto inicial</th><th>Efectivo esperado del turno</th></tr></thead><tbody>
+              @else{<app-list-shell><app-table label="Turnos abiertos"><thead><tr><th scope="col">Caja</th><th scope="col">Responsable</th><th scope="col">Apertura</th><th scope="col">Monto inicial</th><th scope="col">Efectivo esperado del turno</th></tr></thead><tbody>
                 @for(s of c.turnos;track s.id){<tr><td>{{s.caja}}</td><td>{{s.responsable}}</td><td>{{date(s.apertura)}}</td><td>{{money(s.monto_inicial)}}</td><td>{{money(s.efectivo_esperado)}}</td></tr>}
-              </tbody></table></div></app-list-shell>}
+              </tbody></app-table></app-list-shell>}
             </section>
           }
         }
@@ -63,28 +64,28 @@ import { apiError } from '../reservas/reservas.service';
             <app-metric-card label="Reservas del dia" [value]="''+r.total_dia" icon="calendar_month" tone="blue" />
             <app-metric-card label="Confirmadas" [value]="''+r.por_estado['CONFIRMADA']" icon="check_circle" tone="green" />
             <app-metric-card label="En curso" [value]="''+r.por_estado['EN_CURSO']" icon="sports_soccer" tone="gold" />
-            <app-metric-card label="Retenciones vigentes del dia" [value]="''+r.por_estado['PENDIENTE']" icon="schedule" tone="gold" />
+            <app-metric-card label="Reservas pendientes de pago del dia" [value]="''+r.por_estado['PENDIENTE']" icon="schedule" tone="gold" />
           </div></section>
-          <section class="dashboard-section"><header><h3>Retenciones pendientes de pago</h3><span>{{r.pendientes_vigentes}} vigentes</span></header>
-            <app-list-shell [empty]="!r.pendientes.length"><div class="dashboard-table-wrap"><table class="table"><thead><tr><th>Cliente</th><th>Cancha</th><th>Horario</th><th>Vence</th><th>Total</th></tr></thead><tbody>
+          <section class="dashboard-section"><header><h3>Reservas pendientes de pago</h3><span>{{r.pendientes_vigentes}} vigentes</span></header>
+            <app-list-shell [empty]="!r.pendientes.length"><app-table label="Reservas pendientes de pago"><thead><tr><th scope="col">Cliente</th><th scope="col">Cancha</th><th scope="col">Horario</th><th scope="col">Plazo para pagar</th><th scope="col">Total</th></tr></thead><tbody>
               @for(p of r.pendientes;track p.id){<tr><td>{{p.cliente}}</td><td>{{p.cancha}}</td><td>{{date(p.inicio)}}</td><td>{{date(p.retencion_hasta)}}</td><td>{{money(p.total)}}</td></tr>}
-            </tbody></table></div></app-list-shell>
+            </tbody></app-table></app-list-shell>
           </section>
           @if(d.perfil!=='cajero'||auth.can('reservas.crear')){
-            <section class="dashboard-section"><h3>Proximas reservas · 7 dias</h3><app-list-shell [empty]="!r.proximas.length"><div class="dashboard-table-wrap"><table class="table"><thead><tr><th>Cliente</th><th>Cancha</th><th>Inicio</th><th>Fin</th><th>Estado</th></tr></thead><tbody>
+            <section class="dashboard-section"><h3>Proximas reservas · 7 dias</h3><app-list-shell [empty]="!r.proximas.length"><app-table label="Proximas reservas"><thead><tr><th scope="col">Cliente</th><th scope="col">Cancha</th><th scope="col">Inicio</th><th scope="col">Fin</th><th scope="col">Estado</th></tr></thead><tbody>
               @for(p of r.proximas;track p.id){<tr><td>{{p.cliente}}</td><td>{{p.cancha}}</td><td>{{date(p.inicio)}}</td><td>{{date(p.fin)}}</td><td><app-badge [state]="p.estado" /></td></tr>}
-            </tbody></table></div></app-list-shell></section>
+            </tbody></app-table></app-list-shell></section>
           }
         }
         @if(d.caja;as c){
           <section class="dashboard-section"><h3>{{c.administracion?'Ultimos cobros de hoy':'Mis ultimos cobros en turnos abiertos'}}</h3>
-            <app-list-shell [empty]="!c.ultimos_cobros.length"><div class="dashboard-table-wrap"><table class="table"><thead><tr><th>Recibo</th><th>Cliente</th><th>Cancha</th><th>Fecha</th><th>Medio</th><th>Importe</th><th class="text-center">Acciones</th></tr></thead><tbody>
+            <app-list-shell [empty]="!c.ultimos_cobros.length"><app-table label="Ultimos cobros"><thead><tr><th scope="col">Recibo</th><th scope="col">Cliente</th><th scope="col">Cancha</th><th scope="col">Fecha</th><th scope="col">Medio</th><th scope="col">Importe</th><th scope="col" class="text-center">Acciones</th></tr></thead><tbody>
               @for(p of c.ultimos_cobros;track p.id){<tr><td>{{p.numero}}</td><td>{{p.cliente}}</td><td>{{p.cancha}}</td><td>{{date(p.fecha)}}</td><td>{{p.medio}}</td><td>{{money(p.importe)}}</td><td class="text-center"><app-button variant="outline-secondary" icon="visibility" size="sm" title="Ver recibo" [disabled]="receiptLoading()" (clicked)="showReceipt(p.id)" /></td></tr>}
-            </tbody></table></div></app-list-shell>
+            </tbody></app-table></app-list-shell>
           </section>
-          @if(c.administracion;as a){<section class="dashboard-section"><header><h3>Cierres de hoy</h3><span>Diferencia neta: {{money(a.diferencia_neta)}}</span></header><app-list-shell [empty]="!a.cierres.length"><div class="dashboard-table-wrap"><table class="table"><thead><tr><th>Caja</th><th>Responsable</th><th>Cierre</th><th>Esperado</th><th>Contado</th><th>Diferencia</th></tr></thead><tbody>
+          @if(c.administracion;as a){<section class="dashboard-section"><header><h3>Cierres de hoy</h3><span>Diferencia neta: {{money(a.diferencia_neta)}}</span></header><app-list-shell [empty]="!a.cierres.length"><app-table label="Cierres de hoy"><thead><tr><th scope="col">Caja</th><th scope="col">Responsable</th><th scope="col">Cierre</th><th scope="col">Esperado</th><th scope="col">Contado</th><th scope="col">Diferencia</th></tr></thead><tbody>
             @for(s of a.cierres;track s.id){<tr><td>{{s.caja}}</td><td>{{s.responsable}}</td><td>{{date(s.cierre)}}</td><td>{{money(s.esperado)}}</td><td>{{money(s.contado)}}</td><td>{{money(s.diferencia)}}</td></tr>}
-          </tbody></table></div></app-list-shell></section>}
+          </tbody></app-table></app-list-shell></section>}
         }
         @if(!d.reservas&&!d.caja&&d.sucursal){<p class="dashboard-status">Sin actividad disponible.</p>}
       }
@@ -115,12 +116,17 @@ export class DashboardComponent {
     this.api.summary(this.branch).subscribe({next:d=>{
       if(sequence!==this.sequence)return;
       this.branch=String(d.sucursal?.id||''); this.data.set(d); this.loading.set(false);
-    },error:e=>{if(sequence===this.sequence){this.error.set(apiError(e));this.loading.set(false);}}});
+      },error:e=>{if(sequence===this.sequence){this.error.set(this.dashboardError(e));this.loading.set(false);}}});
+  }
+  private dashboardError(error: unknown){
+    const status=(error as {status?:number}|null)?.status||0;
+    if(status>=500)return 'El servidor no pudo generar el resumen. Verifica que MySQL este activo, aplica las migraciones pendientes con python manage.py migrate y revisa la terminal del backend.';
+    return apiError(error);
   }
   money(value:string){return new Intl.NumberFormat('es-BO',{style:'currency',currency:'BOB',currencyDisplay:'narrowSymbol'}).format(Number(value));}
   date(value:string){return new Intl.DateTimeFormat('es-BO',{timeZone:this.data()?.sucursal?.zona_horaria||'America/La_Paz',dateStyle:'short',timeStyle:'short'}).format(new Date(value));}
   day(value:string){return new Intl.DateTimeFormat('es-BO',{timeZone:'UTC',dateStyle:'long'}).format(new Date(value+'T12:00:00Z'));}
-  state(value:string){return ({PENDIENTE:'Pendiente de pago',CONFIRMADA:'Confirmada',EN_CURSO:'En curso',FINALIZADA:'Finalizada',CANCELADA:'Cancelada',EXPIRADA:'Retencion vencida'} as Record<string,string>)[value]||value;}
+  state(value:string){return ({PENDIENTE:'Pendiente de pago',CONFIRMADA:'Confirmada',EN_CURSO:'En curso',FINALIZADA:'Finalizada',CANCELADA:'Cancelada',EXPIRADA:'Plazo de pago vencido'} as Record<string,string>)[value]||value;}
   showReceipt(id:number){
     if(this.receiptLoading())return;
     const sequence=++this.receiptSequence;

@@ -1,13 +1,7 @@
-.cash-tabs { display: flex; gap: 6px; overflow-x: auto; border-bottom: 1px solid var(--border-color); margin-bottom: 22px; }
-.cash-tabs button { border: 0; border-bottom: 3px solid transparent; background: transparent; padding: 12px 16px; color: var(--text-600); font-size: 14px; white-space: nowrap; }
-.cash-tabs button.active { border-bottom-color: var(--accent); font-weight: 600; color: var(--text-700); }
 .cash-section { margin: 20px 0; padding-bottom: 22px; border-bottom: 1px solid var(--border-color); }
 .cash-section h3 { font-size: 18px; }
 .cash-section header span { font-size: 13px; color: var(--text-500); }
 .cash-totals { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 20px; padding: 20px 0; }
 .cash-totals small { display: block; color: var(--text-500); margin-bottom: 6px; }
 .cash-totals strong { font-size: 20px; color: var(--text-700); }
-.cash-table { margin: 0; font-size: 14px; }
-.cash-table th { font-size: 12px; background: var(--bg-elevated); text-transform: uppercase; }
-.cash-table td,.cash-table th { padding: 14px; vertical-align: middle; }
 .cash-table td { overflow-wrap: anywhere; max-width: 280px; }

@@ -37,6 +37,7 @@ result=load('caja/caja.component.ts','2',[boxes[0]]);
 assert.equal(result.component.box,'');assert.equal(result.calls.length,0);
 result.component.load();assert.equal(result.component.box,'');
 result.component.openOperation('box');assert.equal(result.component.branch,'2');
+assert.equal(result.component.operation(),'','Box creation is no longer an operational action');
 result=load('caja/caja.component.ts','999',boxes);
 assert.equal(result.component.box,'10');
 result=load('reservas/clientes.component.ts','2',boxes);

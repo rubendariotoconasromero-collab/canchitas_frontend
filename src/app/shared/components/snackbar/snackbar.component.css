@@ -1,12 +1,19 @@
 .snackbar-container {
   position: fixed;
+  inset: auto 1rem 1rem auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
   right: 1rem;
   bottom: 1rem;
   z-index: 2000;
-  display: grid;
+  display: none;
   gap: 0.6rem;
   width: min(360px, calc(100vw - 2rem));
 }
+.snackbar-container:popover-open { display: grid; }
+.snackbar-container::backdrop { background: transparent; pointer-events: none; }
 
 .snackbar-item {
   display: flex;
@@ -18,8 +25,15 @@
   background: var(--bg-surface);
   color: var(--text-700);
   box-shadow: var(--shadow-lg);
-  cursor: pointer;
+  font-size: var(--text-sm, 14px);
+  line-height: 1.5;
 }
+.snackbar-icon { flex: 0 0 auto; font-size: 20px; }
+.snackbar-text { flex: 1; min-width: 0; overflow-wrap: anywhere; white-space: pre-line; }
+.snackbar-close { flex: 0 0 28px; width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; }
+.snackbar-close .material-symbols-outlined { font-size: 18px; }
+.snackbar-close:hover { background: rgba(0, 0, 0, .06); }
+.snackbar-close:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 
 .snackbar-success {
   border-color: var(--alert-success-border-color);

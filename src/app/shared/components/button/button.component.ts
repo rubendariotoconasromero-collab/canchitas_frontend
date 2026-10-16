@@ -7,6 +7,7 @@ import {
   computed,
   input,
 } from '@angular/core';
+import { LoadingComponent } from '../loading/loading.component';
 
 export type ButtonVariant =
   | 'primary'
@@ -22,6 +23,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
   styleUrl: './button.component.css',
   selector: 'app-button',
   standalone: true,
+  imports: [LoadingComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
@@ -37,9 +39,9 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
       (click)="clicked.emit($event)"
     >
       @if (loading()) {
-        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        <app-loading [compact]="true" aria-hidden="true" />
       }
-      @if (icon()) {
+      @if (icon() && !loading()) {
         <span class="material-symbols-outlined" aria-hidden="true">{{ icon() }}</span>
       }
       <ng-content />

@@ -4,9 +4,12 @@ import { API_BASE_URL } from '../../core/constants/api-endpoints';
 
 export interface CashBox {id:number; nombre:string; sucursal:number; sucursal_nombre:string; zona_horaria:string; sesion_actual:number|null; activa:boolean;}
 export interface PaymentMethod {id:number; nombre:string; efectivo:boolean;}
+export interface ChargePaymentLine {medio:number;importe:string;recibido:string;referencia:string;verificado:boolean;}
+export interface ChargeRequest {sesion:number;reserva:number;clave:string;importe:string;pagos:ChargePaymentLine[];iniciar:boolean;}
+export interface ReceiptPaymentLine {id:number; medio:number; medio_nombre:string; efectivo:boolean; importe:string; recibido:string; cambio:string; referencia_externa:string; verificado:boolean; sesion:number;}
 export interface CashSession {id:number; caja:number; caja_nombre:string; sucursal:number; responsable:number; responsable_nombre:string; apertura:string; cierre:string|null; monto_inicial:string; efectivo_esperado:string|null; efectivo_contado:string|null; diferencia:string|null; observaciones:string; resumen:{esperado:string; cobros_por_medio:Record<string,string>};}
 export interface CashMovement {id:number; tipo:string; importe:string; efectivo:boolean; medio:string; motivo:string; actor_nombre:string; created_at:string;}
-export interface Receipt {id:number; numero:string; reserva:number; sesion:number; created_at:string; recibido:string; cambio:string; referencia_externa:string; datos:{negocio:string; sucursal:string; caja:string; operador:string; cliente:{nombre:string}; codigo_reserva:string; cancha:string; deporte:string; inicio:string; fin:string; zona_horaria:string; importe:string; medio:string};}
+export interface Receipt {id:number; numero:string; codigo_correlativo?:string; codigo_pago?:string; codigo_reserva?:string; reserva:number; sesion:number; created_at:string; recibido:string; cambio:string; referencia_externa:string; lineas:ReceiptPaymentLine[]; datos:{negocio:string; sucursal:string; caja:string; operador:string; cliente:{nombre:string}; codigo_reserva:string; cancha:string; deporte:string; inicio:string; fin:string; zona_horaria:string; importe:string; medio:string; medios?:{medio:string;efectivo:boolean;importe:string;recibido:string;cambio:string;referencia:string;verificado:boolean}[]};}
 
 @Injectable({providedIn:'root'})
 export class CajaService {
@@ -23,5 +26,5 @@ export class CajaService {
   open(box:number,amount:number){return this.http.post<CashSession>(this.url(`cajas/${box}/abrir/`),{monto_inicial:amount});}
   move(session:number,data:object){return this.http.post<CashMovement>(this.url(`sesiones/${session}/movimiento/`),data);}
   close(session:number,data:object){return this.http.post<CashSession>(this.url(`sesiones/${session}/cerrar/`),data);}
-  charge(data:object){return this.http.post<Receipt>(this.url('recibos/'),data);}
+  charge(data:ChargeRequest){return this.http.post<Receipt>(this.url('recibos/'),data);}
 }

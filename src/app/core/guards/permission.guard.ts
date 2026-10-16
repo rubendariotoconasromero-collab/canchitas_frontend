@@ -13,6 +13,7 @@ export const permissionGuard: CanActivateChildFn = route => {
         if (auth.can('reservas.ver')) return router.createUrlTree(['/agenda']);
         if (auth.can('caja.ver')) return router.createUrlTree(['/caja']);
         if (auth.can('clientes.ver')) return router.createUrlTree(['/clientes']);
+        if (auth.can('solicitudes.ver')) return router.createUrlTree(['/solicitudes']);
         const first = ['usuarios', 'roles', 'permisos', 'canchas', 'deportes', 'sucursales', 'politicas', 'negocio'].find(resource => auth.can(resource + '.ver'));
         if (first) return router.createUrlTree(['/' + first]);
       }

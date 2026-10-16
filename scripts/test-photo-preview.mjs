@@ -27,6 +27,7 @@ const component = Object.create(exports.CatalogListComponent.prototype);
 Object.assign(component, {
   photoPreview: signal(''), photoPreviewError: signal(''), photoPreviewFailed: signal(false),
   opened: signal(true), saving: signal(false), previewUrl: null, originalPhoto: '', file: null,
+  batchPhotos: signal([]),
 });
 const control = {value: '', errors: null, setValue(value) {this.value = value; this.errors = null;},
   setErrors(errors) {this.errors = errors;}, markAsTouched() {}};

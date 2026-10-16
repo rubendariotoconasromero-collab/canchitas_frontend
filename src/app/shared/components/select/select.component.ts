@@ -41,9 +41,7 @@ export interface SelectOption {
       (change)="onSelect($any($event.target).value)"
       (blur)="onBlur()"
     >
-      @if (placeholder()) {
-        <option value="" [selected]="_value() === ''">{{ placeholder() }}</option>
-      }
+      <option value="" [selected]="_value() === ''">{{ placeholder() || 'Seleccionar' }}</option>
       @for (option of options(); track option.value) {
         <option [value]="option.value" [selected]="_value() === option.value">{{ option.label }}</option>
       }

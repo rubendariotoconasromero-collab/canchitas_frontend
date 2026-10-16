@@ -6,7 +6,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, Validators } from '@angular/forms';
 
 let nextId = 0;
 
@@ -21,7 +21,7 @@ export type InputType = 'text' | 'email' | 'password' | 'number' | 'date' | 'tim
     provide: NG_VALUE_ACCESSOR,
     useExisting: forwardRef(() => InputComponent),
     multi: true,
-  }],
+  }, { provide: NG_VALIDATORS, useExisting: forwardRef(() => InputComponent), multi: true }],
   template: `
     @if (label()) {
       <label class="form-label" [for]="id">
@@ -78,7 +78,7 @@ export type InputType = 'text' | 'email' | 'password' | 'number' | 'date' | 'tim
     }
   `,
 })
-export class InputComponent implements ControlValueAccessor {
+export class InputComponent implements ControlValueAccessor, Validator {
   readonly id = 'input-' + nextId++;
   readonly autocomplete = input('off');
   label = input('');
@@ -99,6 +99,24 @@ export class InputComponent implements ControlValueAccessor {
 
   private onChange = (_: string) => {};
   private onTouched = () => {};
+  private validatorChanged = () => {};
+
+  validate(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (this.required() && (value == null || String(value).trim() === '')) return {required: true};
+    if (value == null || value === '') return null;
+    if (this.type() === 'email') return Validators.email(control);
+    if (this.type() === 'url') {
+      try { const url = new URL(String(value)); return ['http:', 'https:'].includes(url.protocol) ? null : {url: true}; }
+      catch { return {url: true}; }
+    }
+    if (this.type() !== 'number') return null;
+    if (!Number.isFinite(Number(value))) return {number: true};
+    return (this.min() == null ? null : Validators.min(this.min()!)(control))
+      || (this.max() == null ? null : Validators.max(this.max()!)(control));
+  }
+  registerOnValidatorChange(fn: () => void): void { this.validatorChanged = fn; }
+  ngOnChanges(): void { this.validatorChanged(); }
 
   writeValue(value: string | number | null): void {
     this._value.set(value != null ? String(value) : '');

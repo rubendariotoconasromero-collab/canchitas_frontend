@@ -9,7 +9,7 @@ export interface CourtOption { id: number; sucursal: number; nombre: string; act
 export interface Span { inicio: string; fin: string; }
 export interface Reservation {
   sucursal:number; origen:string;
-  id: number; codigo: string; cliente: number | null; cliente_snapshot: { nombre: string; telefono: string; sin_cliente?: boolean }; estado: string;
+  id: number; codigo: string; codigo_correlativo?: string; cliente: number | null; cliente_snapshot: { nombre: string; telefono: string; sin_cliente?: boolean }; estado: string;
   total: string; total_pagado: string; saldo_pendiente: string; retencion_hasta: string; horas_cancelacion: number; condiciones: string; notas: string;
   detalle: Span & { cancha: number; cancha_nombre: string; deporte_nombre: string; zona_horaria: string;
     desglose_tarifa: { nombre: string; minutos: number; importe: string }[] };
@@ -36,14 +36,10 @@ export class ReservasService {
   quote(data: object) { return this.http.post<Quote>(this.url('reservas/cotizar/'), data); }
   quoteMove(id: number, data: object) { return this.http.post<Quote>(this.url(`reservas/${id}/cotizar-reprogramacion/`), data); }
   reserve(data: object) { return this.http.post<Reservation>(this.url('reservas/'), data); }
+  reservation(id:number) { return this.http.get<Reservation>(this.url(`reservas/${id}/`)); }
   change(id: number, action: string, data: object = {}) { return this.http.post<Reservation>(this.url(`reservas/${id}/${action}/`), data); }
   block(data: object) { return this.http.post<Block>(this.url('bloqueos/'), data); }
   release(id: number) { return this.http.post<Block>(this.url(`bloqueos/${id}/liberar/`), {}); }
 }
 
-export function apiError(error: any): string {
-  const value = error?.error;
-  if (typeof value === 'string') return 'No se pudo comunicar con el servidor.';
-  const flatten = (item: any): string[] => typeof item === 'string' ? [item] : item && typeof item === 'object' ? Object.values(item).flatMap(flatten) : [];
-  return flatten(value).join(' ') || 'No se pudo completar la operacion.';
-}
+export { apiError } from '../../core/utils/api-error';

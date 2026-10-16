@@ -7,13 +7,16 @@ import * as rxjs from 'rxjs';
 
 const read = path => readFileSync(new URL('../src/app/' + path, import.meta.url), 'utf8');
 const signal = initial => { let value=initial; const get=()=>value; get.set=next=>{value=next;}; return get; };
-let template, respond, reject;
+let template, respond, reject, optionsObserver;
 const writes=[];
 const rows=[{id:1,nombre:'Principal',sucursal_nombre:'Central',activa:true,sesion_actual:10},
   {id:2,nombre:'Recepcion',sucursal_nombre:'Norte',activa:false,sesion_actual:null},
   {id:3,nombre:'Auxiliar',sucursal_nombre:'Central',activa:true,sesion_actual:null}];
 let loads=0;
 const api={boxes:()=>({subscribe:observer=>{loads++;observer.next(rows);}}),
+  success:()=>{},
+  options:()=>({subscribe:observer=>{optionsObserver=observer;}}),
+  createBox:(name,branch)=>{writes.push({name,branch});return{subscribe:observer=>{respond=observer.next;reject=observer.error;}};},
   updateBox:(id,data)=>{writes.push({id,data});return{subscribe:observer=>{respond=observer.next;reject=observer.error;}};}};
 const exports={};
 vm.runInNewContext(ts.transpileModule(read('features/caja/cajas-admin.component.ts'),{compilerOptions:{
@@ -42,6 +45,24 @@ page.editing.set(null);page.askToggle(rows[1]);page.toggle();
 assert.equal(writes.at(-1).data.activa,true);respond();assert.equal(page.toggleTarget(),null);assert.equal(loads,2);
 page.askToggle(rows[2]);page.toggle();assert.equal(writes.at(-1).data.activa,false);
 reject({error:{detail:'Turno abierto'}});assert.equal(page.formError(),'Turno abierto');assert.equal(page.toggleTarget(),rows[2]);
+page.toggleTarget.set(null);
+page.newBox();assert.equal(page.creating(),true);assert.equal(page.optionsLoading(),true);
+const before=writes.length;page.name='Principal';page.branch='1';page.saveName();assert.equal(writes.length,before,'No creation before branch options load');
+optionsObserver.error({error:{detail:'Sin conexion'}});assert.equal(page.optionsError(),'Sin conexion');
+page.saveName();assert.equal(writes.length,before,'Failed options cannot authorize a branch');
+page.loadBranches();optionsObserver.next({sucursales:[{id:2,nombre:'Norte'}]});
+assert.equal(page.branch,'2');assert.equal(page.optionsLoading(),false);
+page.branch='999';page.saveName();assert.equal(writes.length,before,'Reject unknown branch');
+page.branch='2';page.name='  Caja nueva  ';page.saveName();
+assert.equal(writes.at(-1).name,'Caja nueva');assert.equal(writes.at(-1).branch,2);
+page.saveName();assert.equal(writes.length,before+1,'Prevent duplicate creation');
+page.closeEditor();assert.equal(page.creating(),true,'Cannot dismiss a pending write');
+reject({error:{detail:'Caja duplicada'}});assert.equal(page.formError(),'Caja duplicada');assert.equal(page.creating(),true);
+page.saveName();respond();assert.equal(page.creating(),false);assert.equal(loads,3);
+page.newBox();const stale=optionsObserver;page.closeEditor();
+page.newBox();optionsObserver.next({sucursales:[{id:1,nombre:'Central'}]});
+stale.next({sucursales:[{id:2,nombre:'Norte'}]});assert.equal(page.branchOptions()[0].value,'1','Ignore responses from a dismissed modal');
+page.closeEditor();
 assert.equal(parseTemplate(template,'cash-admin').errors,null);
 for(const component of ['app-page-header','app-list-toolbar','app-select','app-list-shell','app-badge','app-dropdown','app-modal']) assert.match(template,new RegExp('<'+component));
 assert.match(template,/backRoute="\/caja"/);
@@ -49,6 +70,8 @@ assert.match(template,/\[disabled\]="saving\(\) \|\| \(box.activa && !!box.sesio
 const routes=read('app.routes.ts');
 assert.match(routes,/path: 'administracion-cajas'.*permission:'caja.configurar',global:true/);
 assert.match(read('features/caja/caja.component.ts'),/route="\/administracion-cajas"/);
+assert.doesNotMatch(read('features/caja/caja.component.ts'),/Nueva caja|createBox\(/);
+assert.match(template,/>Nueva caja</);
 assert.match(read('shared/components/layout/sidebar/sidebar.component.ts'),/\*appCan="'caja.configurar'; global: true"/);
 
 class Router {}

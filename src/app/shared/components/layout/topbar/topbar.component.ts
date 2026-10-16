@@ -1,6 +1,8 @@
 import { Component, input, output } from '@angular/core';
+import { AvisosComponent } from '../../../../features/reportes/avisos.component';
 @Component({
   selector: 'app-topbar',
+  imports: [AvisosComponent],
   template: `
         <header class="topbar">
           <div class="topbar-leading">
@@ -26,6 +28,7 @@ import { Component, input, output } from '@angular/core';
             </div>
           </div>
           <div class="topbar-user">
+            <app-avisos />
             <span class="topbar-avatar">{{ userName().charAt(0).toUpperCase() }}</span>
             <div>
               <strong>{{ userName() }}</strong>

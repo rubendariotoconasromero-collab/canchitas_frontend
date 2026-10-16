@@ -10,8 +10,8 @@ import { BadgeComponent } from '../../shared/components/badge/badge.component';
     <article class="business-profile">
       <header class="business-identity">
         <div class="business-logo">
-          @if (imageAvailable(business()['logo_url'])) {
-            <img [src]="webUrl(business()['logo_url'])" alt="Logo del negocio" (error)="imageFailed(business()['logo_url'])" />
+          @if (imageAvailable(assetUrl('logo_url'))) {
+            <img [src]="webUrl(assetUrl('logo_url'))" alt="Logo del negocio" (error)="imageFailed(assetUrl('logo_url'))" />
           } @else { <span class="material-symbols-outlined" aria-hidden="true">sports_soccer</span> }
         </div>
         <div class="identity-copy">
@@ -50,14 +50,14 @@ import { BadgeComponent } from '../../shared/components/badge/badge.component';
             <figure>
               <figcaption><strong>{{ asset.label }}</strong><span>{{ asset.subtitle }}</span></figcaption>
               <div class="asset-preview" [class.logo-preview]="asset.key === 'logo_url'">
-                @if (imageAvailable(business()[asset.key])) {
-                  <img [src]="webUrl(business()[asset.key])" [alt]="asset.label + ' del negocio'" loading="lazy" (error)="imageFailed(business()[asset.key])" />
+                @if (imageAvailable(assetUrl(asset.key))) {
+                  <img [src]="webUrl(assetUrl(asset.key))" [alt]="asset.label + ' del negocio'" loading="lazy" (error)="imageFailed(assetUrl(asset.key))" />
                 } @else {
                   <span class="material-symbols-outlined" aria-hidden="true">{{ asset.key === 'logo_url' ? 'image' : 'panorama' }}</span>
                   <span>{{ business()[asset.key] ? 'Imagen no disponible' : 'Sin imagen registrada' }}</span>
                 }
               </div>
-              @if (webUrl(business()[asset.key]); as url) { <a class="asset-source" [href]="url" target="_blank" rel="noopener noreferrer" [title]="url">{{ url }}</a> }
+              @if (webUrl(assetUrl(asset.key)); as url) { <a class="asset-source" [href]="url" target="_blank" rel="noopener noreferrer" [title]="url">{{ url }}</a> }
             </figure>
           }
         </div>
@@ -72,6 +72,7 @@ export class BusinessProfileComponent {
     { key: 'portada_url', label: 'Portada', subtitle: 'Imagen principal' },
   ];
   private readonly failedImages = signal<string[]>([]);
+  assetUrl(key:string) { return key === 'logo_url' ? this.business()['archivo'] || this.business()[key] : this.business()[key]; }
 
   webUrl(value: unknown): string {
     const url = typeof value === 'string' ? value.trim() : '';

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CatalogListComponent } from './catalog-list.component';
 import { CATALOG, CatalogRow } from './catalog.config';
@@ -8,14 +8,17 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { formatArea, formatDimensions } from './court-dimensions';
+import { LoadingComponent } from '../../shared/components/loading/loading.component';
+import { TabsComponent } from '../../shared/components/tabs/tabs.component';
 
-@Component({selector:'app-cancha-detail',imports:[CatalogListComponent,ButtonComponent,BadgeComponent,PageHeaderComponent],styleUrls:['./catalog.css','./court-dimensions.css','./cancha-detail.component.css'],
+@Component({selector:'app-cancha-detail',imports:[CatalogListComponent,ButtonComponent,BadgeComponent,PageHeaderComponent,LoadingComponent,TabsComponent],styleUrls:['./catalog.css','./court-dimensions.css','./cancha-detail.component.css'],
   template:`<div class="main-content">
     <app-page-header [title]="court()?.['nombre'] || 'Informacion de cancha'" icon="sports_soccer" backRoute="/canchas" backLabel="Volver a canchas" />
     @if (error()) {<div class="alert alert-danger" role="alert">{{error()}}</div><app-button icon="refresh" (clicked)="load()">Reintentar</app-button>}
     @if (court(); as c) {
       <header class="court-heading">
         <div class="court-summary">
+          <span>{{c['codigo_correlativo']}}</span>
           <span><span class="material-symbols-outlined" aria-hidden="true">location_on</span>{{c['sucursal_nombre']}}</span>
           <span><span class="material-symbols-outlined" aria-hidden="true">schedule</span>Minimo {{c['duracion_minima_minutos']}} min</span>
           <app-badge title="Publicacion en la web publica" [active]="!!c['publicada']" activeLabel="Publicada" inactiveLabel="No publicada" [icon]="c['publicada'] ? 'public' : 'visibility_off'" />
@@ -32,15 +35,12 @@ import { formatArea, formatDimensions } from './court-dimensions';
           <ul>@for (message of c['pendientes_publicacion']; track message) {<li>{{message}}</li>}</ul>
         </div>
       }
-      <nav class="catalog-tabs" aria-label="Configuracion de cancha">
-        @for (tab of tabs; track tab.key) { @if (auth.can(configs[tab.key].permission + '.ver')) {
-          <button type="button" [class.active]="selected() === tab.key" [attr.aria-current]="selected() === tab.key ? 'page' : null" (click)="selected.set(tab.key)">{{tab.label}}</button>
-        }}
-      </nav>
-      @for (tab of tabs; track tab.key) { @if (selected() === tab.key && auth.can(configs[tab.key].permission + '.ver')) {
+      <app-tabs label="Configuracion de cancha" [items]="visibleTabs()" [selected]="activeTab()" (selectedChange)="selectTab($event)">
+      @for (tab of visibleTabs(); track tab.key) { @if (activeTab() === tab.key && auth.can(configs[tab.key].permission + '.ver')) {
         <app-catalog-list [config]="configs[tab.key]" [showBack]="false" [fixed]="tab.key === 'politicas' ? branchFilter() : filter" (changed)="load()" />
       }}
-    } @else if (!error()) {<p role="status">Cargando cancha...</p>}
+      </app-tabs>
+    } @else if (!error()) {<app-loading message="Cargando cancha..." />}
   </div>`})
 export class CanchaDetailComponent {
   readonly dimensions = formatDimensions;
@@ -56,6 +56,9 @@ export class CanchaDetailComponent {
   readonly selected = signal('cancha-deportes');
   readonly tabs = [{key:'cancha-deportes',label:'Deportes'},{key:'fotos',label:'Fotos'},
     {key:'horarios',label:'Horarios'},{key:'tarifas',label:'Tarifas'},{key:'politicas',label:'Politica de sucursal'}];
+  readonly visibleTabs = computed(() => this.tabs.filter(tab => this.auth.can(this.configs[tab.key].permission + '.ver')));
+  readonly activeTab = computed(() => this.visibleTabs().some(tab => tab.key === this.selected()) ? this.selected() : this.visibleTabs()[0]?.key || '');
+  selectTab(key: string) { if (this.visibleTabs().some(tab => tab.key === key)) this.selected.set(key); }
   constructor() { this.load(); }
   load() { this.error.set('');this.service.get('canchas',this.id).subscribe({next:c => {
     this.court.set(c); if (this.branchFilter()['sucursal'] !== c['sucursal']) this.branchFilter.set({sucursal:c['sucursal']});

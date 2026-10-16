@@ -11,10 +11,11 @@ describe('Catalog forms', () => {
   let service: jasmine.SpyObj<CatalogService>;
   let can: jasmine.Spy;
   beforeEach(() => {
-    service = jasmine.createSpyObj('CatalogService',['list','save','deactivate','movePhoto']);
+    service = jasmine.createSpyObj('CatalogService',['list','save','deactivate','movePhoto','uploadPhotos']);
     service.list.and.returnValue(of([]));
     service.save.and.returnValue(of({id:1}));
     service.movePhoto.and.returnValue(of([]));
+    service.uploadPhotos.and.returnValue(of([{id: 1}, {id: 2}]));
     can = jasmine.createSpy('can').and.returnValue(true);
     TestBed.configureTestingModule({providers:[provideRouter([]),
       {provide:CatalogService,useValue:service},{provide:AuthService,useValue:{can}}]});
@@ -143,17 +144,28 @@ describe('Catalog forms', () => {
     const fixture = setup('deportes');
     expect(fixture.nativeElement.textContent).not.toContain('Agregar');
   });
-  it('sends photo bytes as multipart with court ownership', () => {
+  it('sends multiple photo bytes as one multipart request with court ownership', () => {
     const fixture = setup('fotos',{cancha:3});
     const component = fixture.componentInstance;
     component.edit();
     expect(component.form.contains('orden')).toBeFalse();
-    component.fileChanged({target:{files:[new File(['image'], 'test.png',{type:'image/png'})]}} as unknown as Event);
-    component.form.patchValue({texto_alternativo:'Vista frontal'});component.save();
-    const payload = service.save.calls.mostRecent().args[1] as FormData;
+    const photos = [new File(['image'], 'test.png',{type:'image/png'}), new File(['image'], 'otra.png',{type:'image/png'})];
+    component.batchChanged(photos.map((file, index) => ({id:index, file, description:'Vista '+index, preview:'', previewFailed:false})));
+    component.save();
+    const payload = service.uploadPhotos.calls.mostRecent().args[0];
     expect(payload.get('cancha')).toBe('3');
-    expect(payload.get('archivo')).toBeInstanceOf(File);
+    expect(payload.getAll('archivos').length).toBe(2);
+    expect(payload.getAll('archivos')[0]).toBeInstanceOf(File);
+    expect(JSON.parse(String(payload.get('fotografias')))).toEqual([{texto_alternativo:'Vista 0'}, {texto_alternativo:'Vista 1'}]);
     expect(payload.has('orden')).toBeFalse();
+    expect(service.save).not.toHaveBeenCalled();
+  });
+  it('keeps editing an existing photograph as a single record', () => {
+    const component = setup('fotos',{cancha:3}).componentInstance;
+    component.edit({id:5, archivo:'https://example.test/foto.png', texto_alternativo:'Vista', publicada:true});
+    component.form.patchValue({texto_alternativo:'Entrada'});component.save();
+    expect(service.save.calls.mostRecent().args[2]).toBe(5);
+    expect(service.uploadPhotos).not.toHaveBeenCalled();
   });
   it('moves photos through the dedicated endpoint and prevents boundary moves', () => {
     const rows = [{id:1,orden:0},{id:2,orden:1}];

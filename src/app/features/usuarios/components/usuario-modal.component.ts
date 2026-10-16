@@ -134,7 +134,7 @@ export class UsuarioModalComponent {
       });
 
       const password = this.form.get('password');
-      password?.setValidators(this.editing() ? [] : [Validators.required, Validators.minLength(8)]);
+      password?.setValidators(this.editing() ? [Validators.minLength(8)] : [Validators.required, Validators.minLength(8)]);
       password?.updateValueAndValidity();
     });
   }

@@ -2,14 +2,15 @@ import { Component, effect, inject, input, output, signal } from '@angular/core'
 import { AuthService } from '../../core/services/auth.service';
 import { Branch, Cliente, ReservasService, apiError } from './reservas.service';
 import { RESERVAS_UI } from './reservas-ui';
+import { SnackbarService } from '../../core/services/snackbar.service';
 
 @Component({
   selector: 'app-cliente-editor', imports: [...RESERVAS_UI], styleUrl: './reservas.component.css',
   template: `
     <app-modal [open]="open()" [title]="client() ? 'Editar cliente' : 'Nuevo cliente'" icon="person" [busy]="saving()" (closed)="closed.emit()">
-      <form #form="ngForm" (ngSubmit)="save()">
+      <form #form="ngForm" (ngSubmit)="form.valid && save()" novalidate>
         <div class="modal-body operation-form">
-          @if(error()) { <div class="alert alert-danger" role="alert">{{error()}}</div> }
+          <app-form-error [message]="error()" [active]="open()" />
           <app-select name="sucursal" label="Sucursal" [options]="branchOptions" [(ngModel)]="draft.sucursal" [disabled]="!!client() || fixedBranch()" [required]="true" />
           <app-input name="nombre" label="Nombre completo" [(ngModel)]="draft.nombre" [required]="true" />
           <div class="operation-grid"><app-input name="telefono" label="Telefono" type="tel" [(ngModel)]="draft.telefono" [required]="true" /><app-input name="documento" label="Documento" [(ngModel)]="draft.documento" /></div>
@@ -22,6 +23,7 @@ import { RESERVAS_UI } from './reservas-ui';
   `,
 })
 export class ClienteEditorComponent {
+  private readonly snackbar = inject(SnackbarService);
   readonly auth = inject(AuthService);
   private readonly api = inject(ReservasService);
   readonly open = input(false);
@@ -48,7 +50,7 @@ export class ClienteEditorComponent {
     this.saving.set(true); this.error.set('');
     const {id, ...data} = this.draft;
     this.api.saveClient({...data, sucursal: Number(data.sucursal)}, this.client()?.id).subscribe({
-      next: client => {this.saving.set(false); this.saved.emit(client);},
+      next: client => {this.snackbar.success(this.client() ? 'Cliente actualizado correctamente.' : 'Cliente registrado correctamente.');this.saving.set(false); this.saved.emit(client);},
       error: error => {this.saving.set(false); this.error.set(apiError(error));},
     });
   }

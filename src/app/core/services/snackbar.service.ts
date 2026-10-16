@@ -13,14 +13,15 @@ export class SnackbarService {
   private counter = 0;
   readonly messages = signal<SnackbarMessage[]>([]);
 
-  show(message: string, type: SnackbarType = 'info', durationMs = 3500): void {
+  show(message: string, type: SnackbarType = 'info', durationMs = 3500): number {
     const id = ++this.counter;
     this.messages.update((items) => [...items, { id, message, type }]);
     setTimeout(() => this.dismiss(id), durationMs);
+    return id;
   }
 
-  success(message: string): void {
-    this.show(message, 'success');
+  success(message: string): number {
+    return this.show(message?.trim() || 'Operacion completada correctamente.', 'success', 4500);
   }
 
   error(message: string): void {

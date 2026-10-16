@@ -1,7 +1,9 @@
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { apiError } from '../../core/utils/api-error';
 import { CanDirective } from '../../shared/directives/can.directive';
 import { AuthService } from '../../core/services/auth.service';
 import { ListToolbarComponent } from '../../shared/components/list-toolbar/list-toolbar.component';
+import { TableComponent } from '../../shared/components/table/table.component';
 import { ListShellComponent } from '../../shared/components/list-shell/list-shell.component';
 import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, computed, inject, signal } from '@angular/core';
 import { AccessFormModalComponent, AccessFormData } from '../access/components/access-form-modal.component';
@@ -17,7 +19,7 @@ import { PermisoPayload, PermisoService } from './permiso.service';
 @Component({
   selector: 'app-permisos',
   standalone: true,
-  imports: [CanDirective, PageHeaderComponent, ListToolbarComponent, ListShellComponent, AccessFormModalComponent, ButtonComponent, BadgeComponent, ConfirmationModalComponent, DropdownComponent, DropdownItemComponent],
+  imports: [TableComponent,CanDirective, PageHeaderComponent, ListToolbarComponent, ListShellComponent, AccessFormModalComponent, ButtonComponent, BadgeComponent, ConfirmationModalComponent, DropdownComponent, DropdownItemComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
@@ -29,23 +31,23 @@ import { PermisoPayload, PermisoService } from './permiso.service';
       <app-list-toolbar searchLabel="Buscar permiso" entity="permisos"
         [total]="permisos().length" [active]="activos()" [(query)]="query" [showRefresh]="true" [loading]="loading()" (refreshed)="load()" />
 
-      <app-list-shell class="permisos-list" [loading]="loading()" [error]="loadError()"
-        [empty]="filteredPermisos().length === 0" (retry)="load()">
-        <div class="list-header">
-          <div class="list-col">ID</div>
-          <div class="list-col">Nombre</div>
-          <div class="list-col hide-sm">Descripcion</div>
-          <div class="list-col text-center">Estado</div>
-          <div class="list-col text-center">Acciones</div>
-        </div>
+      <app-list-shell [loading]="loading()" [error]="loadError()"
+        [empty]="filteredPermisos().length === 0" (retry)="load()"><app-table label="Permisos" minWidth="640px" class="permisos-list">
+        <thead><tr>
+          <th scope="col">ID</th>
+          <th scope="col">Nombre</th>
+          <th scope="col" class="hide-sm">Descripcion</th>
+          <th scope="col" class="text-center">Estado</th>
+          @if(showActions){<th scope="col" class="text-center">Acciones</th>}
+        </tr></thead><tbody>
 
           @for (permiso of filteredPermisos(); track permiso.id) {
-            <div class="list-row">
-              <div class="list-col list-col-id">#{{ permiso.id }}</div>
-              <div class="list-col list-col-bold">{{ permiso.nombre }}</div>
-              <div class="list-col hide-sm list-col-muted">{{ permiso.descripcion || 'Sin descripcion' }}</div>
-              <div class="list-col center-col"><app-badge [active]="permiso.estado" /></div>
-              <div class="list-col list-col-actions">
+            <tr>
+              <td class="table-id">#{{ permiso.id }}</td>
+              <td class="table-bold">{{ permiso.nombre }}</td>
+              <td class="hide-sm table-muted">{{ permiso.descripcion || 'Sin descripcion' }}</td>
+              <td class="text-center"><app-badge [active]="permiso.estado" /></td>
+              @if(showActions){<td class="table-actions">
                 <app-dropdown align="end" [title]="'Acciones para ' + permiso.nombre">
                   <app-dropdown-item
                     *appCan="'permisos.editar'; global: true"
@@ -61,10 +63,10 @@ import { PermisoPayload, PermisoService } from './permiso.service';
                     (clicked)="confirmToggle(permiso)"
                   />
                 </app-dropdown>
-              </div>
-            </div>
+              </td>}
+            </tr>
           }
-      </app-list-shell>
+      </tbody></app-table></app-list-shell>
     </div>
 
     <app-access-form-modal entity="permiso" [open]="showModal()" [data]="formData()"
@@ -105,6 +107,8 @@ export class PermisosComponent implements OnInit {
     if (!term) return this.permisos();
     return this.permisos().filter((permiso) => `${permiso.nombre} ${permiso.descripcion ?? ''}`.toLowerCase().includes(term));
   });
+
+  get showActions(): boolean { return ['permisos.editar', 'permisos.cambiar_estado'].some(permission => this.auth.can(permission, true)); }
 
   ngOnInit(): void {
     this.load();
@@ -150,9 +154,9 @@ export class PermisosComponent implements OnInit {
         this.snackbar.success(response.message);
         this.load();
       },
-      error: () => {
+      error: err => {
         this.saving.set(false);
-        this.snackbar.error('No se pudo guardar el permiso.');
+        this.snackbar.error(apiError(err, 'No se pudo guardar el permiso.'));
       },
     });
   }
@@ -171,7 +175,7 @@ export class PermisosComponent implements OnInit {
         this.snackbar.success(response.message);
         this.load();
       },
-      error: () => this.snackbar.error('No se pudo cambiar el estado.'),
+      error: err => this.snackbar.error(apiError(err, 'No se pudo cambiar el estado.')),
     });
   }
 
