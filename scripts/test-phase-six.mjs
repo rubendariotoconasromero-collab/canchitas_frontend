@@ -63,7 +63,10 @@ notices.load();noticeCalls[1].next({count:0,results:[],actualizado_en:'second'})
 const {PaginationComponent}=load('shared/components/pagination/pagination.component.ts');const pagination=new PaginationComponent();
 pagination.count=()=>60;assert.equal(pagination.pages(),3);pagination.chooseSize('');assert.equal(pagination.sizeChanged.value,undefined);pagination.chooseSize('50');assert.equal(pagination.sizeChanged.value,50);
 for(const file of ['reportes.component.ts','auditoria.component.ts','avisos.component.ts']){
-  const source=read('features/reportes/'+file);assert.doesNotMatch(source,/setInterval|setTimeout|timer\(|interval\(|WebSocket|EventSource/);
+  const source=read('features/reportes/'+file);
+  assert.doesNotMatch(source,/setInterval|\btimer\(|\binterval\(|WebSocket|EventSource/,'Reportes se actualizan solo manualmente');
+  // El unico temporizador permitido libera el archivo descargado, nunca recarga datos.
+  for(const timer of source.matchAll(/setTimeout\(([^;]*)/g))assert.match(timer[1],/URL\.revokeObjectURL/,'Los temporizadores solo liberan descargas');
   assert.match(source,/<app-table/);assert.match(source,/<app-list-toolbar/);
 }
 const routes=read('app.routes.ts');assert.match(routes,/path: 'reportes'.*permission:'reportes.ver'/);assert.match(routes,/path: 'auditoria'.*permission:'auditoria.ver',global:true/);

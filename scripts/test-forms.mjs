@@ -102,9 +102,12 @@ function audit(directory){
         const reference=form.references.find(reference=>reference.value==='ngForm').name;
         assert.ok(submit.handler.source.startsWith(reference+'.valid &&'),'Template-driven submits must block invalid forms');
         for(const controlName of ['app-input','app-select','app-textarea','app-checkbox','app-search-select']){
-          for(const element of elements(form.children,controlName))assert.ok(element.attributes.some(a=>a.name==='name'),`${path}: unnamed ngModel control`);
+          // El nombre puede ser estatico (name) o dinamico por fila ([name]).
+          for(const element of elements(form.children,controlName))assert.ok(
+            element.attributes.some(a=>a.name==='name')||element.inputs.some(i=>i.name==='name'),
+            `${path}: unnamed ngModel control`);
         }
-        let called=0;const ctx={[reference]:{valid:false},save:()=>called++,saveName:()=>called++,pay:()=>called++,submit:()=>called++,consult:()=>called++,accept:()=>called++,reject:()=>called++,add:()=>called++};
+        let called=0;const ctx={[reference]:{valid:false},validBreakdown:true,save:()=>called++,saveName:()=>called++,pay:()=>called++,submit:()=>called++,consult:()=>called++,accept:()=>called++,reject:()=>called++,add:()=>called++};
         vm.runInNewContext(submit.handler.source,ctx);assert.equal(called,0);
         ctx[reference].valid=true;vm.runInNewContext(submit.handler.source,ctx);assert.equal(called,1);
       }
