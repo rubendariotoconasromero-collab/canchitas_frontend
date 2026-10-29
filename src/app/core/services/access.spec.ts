@@ -25,13 +25,14 @@ describe('Effective access and session', () => {
 
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     TestBed.configureTestingModule({ providers: [provideRouter([]),
       provideHttpClient(withInterceptors([authInterceptor])), provideHttpClientTesting()] });
     TestBed.inject(StorageService).setSession('test-token', user);
     auth = TestBed.inject(AuthService);
     http = TestBed.inject(HttpTestingController);
   });
-  afterEach(() => { http.verify(); localStorage.clear(); });
+  afterEach(() => { http.verify(); localStorage.clear(); sessionStorage.clear(); });
 
   it('hides write actions and reacts to permission revocation', () => {
     const fixture = TestBed.createComponent(ActionsHost);

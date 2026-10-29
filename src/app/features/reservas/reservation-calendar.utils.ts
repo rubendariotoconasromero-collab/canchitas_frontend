@@ -18,12 +18,12 @@ export function moveCalendarDay(day: string, view: CalendarView, direction: numb
   return date.toISOString().slice(0, 10);
 }
 export function occupies(r: Reservation, now: number) {
-  return ['CONFIRMADA', 'EN_CURSO', 'FINALIZADA'].includes(r.estado) ||
+  return ['CONFIRMADA', 'EN_CURSO', 'FINALIZADA', 'NO_ASISTIO'].includes(r.estado) ||
     (r.estado === 'PENDIENTE' && Date.parse(r.retencion_hasta) > now);
 }
 export const STATE_LABELS: Record<string, string> = {
   PENDIENTE: 'Pendiente de pago', CONFIRMADA: 'Confirmada', EN_CURSO: 'En curso',
-  FINALIZADA: 'Finalizada', CANCELADA: 'Cancelada', EXPIRADA: 'Plazo de pago vencido',
+  FINALIZADA: 'Finalizada', NO_ASISTIO: 'Cliente no asistio', CANCELADA: 'Cancelada', EXPIRADA: 'Plazo de pago vencido',
 };
 export function calendarEvents(data: Agenda | null, state: string, now = Date.now()): EventInput[] {
   if (!data) return [];

@@ -19,7 +19,7 @@ app-reservation-calendar { display: block; min-width: 0; }
 .reservation-calendar .fc .state-pendiente { background: #fff0bf; color: #624700; border-color: #c79613; }
 .reservation-calendar .fc .state-confirmada { background: #e1f3e8; color: #195638; border-color: #278057; }
 .reservation-calendar .fc .state-en_curso { background: #e3effc; color: #204f84; border-color: #316eb0; }
-.reservation-calendar .fc .state-cancelada,.reservation-calendar .fc .state-expirada { background: #f5f6f8; color: #68717e; border: 1px dashed #a4aab3; }
+.reservation-calendar .fc .state-cancelada,.reservation-calendar .fc .state-expirada,.reservation-calendar .fc .state-no_asistio { background: #f5f6f8; color: #68717e; border: 1px dashed #a4aab3; }
 .reservation-calendar .fc .state-block { background: #fbe9e9; color: #823737; border-color: #a84848; }
 .reservation-calendar .fc .fc-event-main { color: inherit; }
 .reservation-calendar .fc .fc-bg-event { opacity: .35; pointer-events: none; }

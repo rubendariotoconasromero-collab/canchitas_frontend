@@ -126,7 +126,7 @@ export class DashboardComponent {
   money(value:string){return new Intl.NumberFormat('es-BO',{style:'currency',currency:'BOB',currencyDisplay:'narrowSymbol'}).format(Number(value));}
   date(value:string){return new Intl.DateTimeFormat('es-BO',{timeZone:this.data()?.sucursal?.zona_horaria||'America/La_Paz',dateStyle:'short',timeStyle:'short'}).format(new Date(value));}
   day(value:string){return new Intl.DateTimeFormat('es-BO',{timeZone:'UTC',dateStyle:'long'}).format(new Date(value+'T12:00:00Z'));}
-  state(value:string){return ({PENDIENTE:'Pendiente de pago',CONFIRMADA:'Confirmada',EN_CURSO:'En curso',FINALIZADA:'Finalizada',CANCELADA:'Cancelada',EXPIRADA:'Plazo de pago vencido'} as Record<string,string>)[value]||value;}
+  state(value:string){return ({PENDIENTE:'Pendiente de pago',CONFIRMADA:'Confirmada',EN_CURSO:'En curso',FINALIZADA:'Finalizada',NO_ASISTIO:'Cliente no asistio',CANCELADA:'Cancelada',EXPIRADA:'Plazo de pago vencido'} as Record<string,string>)[value]||value;}
   showReceipt(id:number){
     if(this.receiptLoading())return;
     const sequence=++this.receiptSequence;

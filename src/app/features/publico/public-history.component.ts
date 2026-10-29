@@ -46,13 +46,14 @@ import { publicStatus, publicStatusLabels } from './public-request-status';
       </app-list-shell>
       @if(data();as result){<app-pagination [count]="result.count" [page]="page" [pageSize]="size" [busy]="loading()||busy()" (pageChanged)="load($event)" (sizeChanged)="changeSize($event)" />}
     </app-tabs>
-    <div class="public-history-footer"><span>Historial privado de este navegador.</span><app-button variant="outline-secondary" icon="logout" [disabled]="busy()||loading()" (clicked)="askClear()">Desvincular historial del dispositivo</app-button></div>
+    <div class="public-history-footer"><span>Este historial pertenece a este navegador@if(data()?.acceso_hasta){ y estara disponible hasta {{date(data()!.acceso_hasta,'America/La_Paz')}}}. Conserva el codigo y la clave de cada solicitud; permiten consultarla o agregarla a otro navegador hasta siete dias despues del horario solicitado.</span><app-button variant="outline-secondary" icon="logout" [disabled]="busy()||loading()" (clicked)="askClear()">Desvincular historial del dispositivo</app-button></div>
   </section>
   <app-modal [open]="importing()" title="Consultar otra solicitud" icon="fact_check" [busy]="busy()" (closed)="closeImport()">
     <form #form="ngForm" (ngSubmit)="form.valid && add()" novalidate><div class="modal-body public-form">
       <app-form-error [message]="formError()" [active]="importing()" />
       <app-input label="Codigo de solicitud" name="code" [(ngModel)]="code" [required]="true" [disabled]="busy()" />
       <app-input label="Clave de seguimiento" name="token" type="password" [showToggle]="true" [(ngModel)]="token" [required]="true" [disabled]="busy()" />
+      <p>La clave es valida hasta siete dias despues del horario solicitado. Si vencio, contacta al negocio.</p>
     </div><div class="modal-footer"><app-button variant="outline-secondary" [disabled]="busy()" (clicked)="closeImport()">Cancelar</app-button><app-button type="submit" icon="add" [loading]="busy()" [disabled]="!!form.invalid">Agregar a mis solicitudes</app-button></div></form>
   </app-modal>
   <app-modal [open]="!!removal()" [title]="removal()?.all?'Desvincular historial':'Quitar solicitud del historial'" icon="help" [busy]="busy()" (closed)="closeRemoval()">

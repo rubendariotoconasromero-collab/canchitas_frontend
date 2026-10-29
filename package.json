@@ -38,7 +38,8 @@
     "test:validation-alerts": "node scripts/test-validation-alerts.mjs",
     "test:phase6": "node scripts/test-phase-six.mjs",
     "test:tabs": "node scripts/test-tabs.mjs",
-    "test:codes": "node scripts/test-correlative-codes.mjs"
+    "test:codes": "node scripts/test-correlative-codes.mjs",
+    "test:access-hardening": "node scripts/test-access-hardening.mjs"
   },
   "prettier": {
     "printWidth": 100,

@@ -72,8 +72,8 @@ export class ReportesComponent {
   readonly applied=signal<Filters|null>(null);readonly query=signal('');readonly page=signal(1);
   branch='';from=todayInBolivia();to=this.from;court='';sport='';state='';box='';medium='';operator='';size=25;
   private sequence=0;private optionsSequence=0;private request?:Subscription;
-  readonly columns=computed(()=>REPORT_COLUMNS[this.kind()]);readonly title=computed(()=>REPORT_TABS.find(t=>t.id===this.kind())?.label||'Reportes');
-  readonly states=['PENDIENTE','CONFIRMADA','EN_CURSO','FINALIZADA','CANCELADA','EXPIRADA'].map(value=>({value,label:value==='PENDIENTE'?'Pendiente de pago':value.replaceAll('_',' ').toLowerCase()}));
+  readonly columns=computed(()=>{const columns=[...REPORT_COLUMNS[this.kind()]];if(this.kind()==='cobros'&&this.applied()?.['medio'])columns.splice(columns.findIndex(c=>c.key==='importe')+1,0,{key:'importe_medio',label:'Medio seleccionado',format:'money'});return columns;});readonly title=computed(()=>REPORT_TABS.find(t=>t.id===this.kind())?.label||'Reportes');
+  readonly states=['PENDIENTE','CONFIRMADA','EN_CURSO','FINALIZADA','NO_ASISTIO','CANCELADA','EXPIRADA'].map(value=>({value,label:value==='PENDIENTE'?'Pendiente de pago':value==='NO_ASISTIO'?'Cliente no asistio':value.replaceAll('_',' ').toLowerCase()}));
   readonly date=displayDate;
   readonly metrics=computed(()=>Object.entries(this.data()?.resumen||{}).filter(([,value])=>typeof value!=='object').map(([key,value])=>({key,label:SUMMARY_LABELS[key]||key,value:MONEY_KEYS.has(key)?this.money(value):String(value)})));
   readonly breakdown=computed(()=>Object.entries(this.data()?.resumen||{}).filter(([,value])=>typeof value==='object').flatMap(([group,value])=>Object.entries(value as Record<string,string>).map(([key,amount])=>({label:group==='por_estado'?key.replaceAll('_',' ').toLowerCase():key,value:this.money(amount)}))));

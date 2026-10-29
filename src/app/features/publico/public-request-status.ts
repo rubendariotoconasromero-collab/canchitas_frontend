@@ -2,7 +2,7 @@ import { Tracking } from './public.service';
 
 export const publicStatusLabels:Record<string,string>={
   EN_REVISION:'En revision',PENDIENTE_PAGO:'Pendiente de pago',ACEPTADA:'Solicitud aceptada',
-  CONFIRMADA:'Reserva confirmada',EN_CURSO:'En curso',FINALIZADA:'Finalizada',CANCELADA:'Cancelada',
+  CONFIRMADA:'Reserva confirmada',EN_CURSO:'En curso',FINALIZADA:'Finalizada',NO_ASISTIO:'Cliente no asistio',CANCELADA:'Cancelada',
   RECHAZADA:'Rechazada',VENCIDA:'Solicitud vencida',EXPIRADA:'Plazo de pago vencido',
 };
 

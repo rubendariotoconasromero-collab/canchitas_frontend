@@ -4,9 +4,10 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { API_BASE_URL, API_ENDPOINTS } from '../constants/api-endpoints';
 import { AuthService } from '../services/auth.service';
+import { StorageService } from '../services/storage.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('canchitas_token');
+  const token = inject(StorageService).getToken();
   const api = req.url.startsWith(API_BASE_URL + '/');
   if (!api || req.url === API_ENDPOINTS.login || req.url.startsWith(`${API_BASE_URL}/publico/`)) {
     return next(req);

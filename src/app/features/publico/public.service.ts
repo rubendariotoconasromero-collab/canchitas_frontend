@@ -14,7 +14,7 @@ export interface PublicQuote {inicio:string;fin:string;total:string;moneda:strin
 export interface Tracking {codigo:string;codigo_correlativo?:string;codigo_reserva?:string|null;estado:string;cancha:string;deporte:string;inicio:string;fin:string;zona_horaria:string;total:string;moneda:string;estado_reserva:string|null;plazo_pago:string|null;motivo:string;seguimiento_hasta:string;condiciones:string;horas_cancelacion:number|null;token?:string;}
 export const requestLabels:Record<string,string>={PENDIENTE:'Pendiente de revision',ACEPTADA:'Solicitud aceptada',RECHAZADA:'Solicitud rechazada',VENCIDA:'Solicitud vencida'};
 export interface PublicHistoryRow extends Tracking {estado_publico:string;creado_at:string;sucursal:string;cancha_id:number;cancha_deporte_id:number;cancha_disponible:boolean;}
-export interface PublicHistoryResult {count:number;page:number;page_size:number;results:PublicHistoryRow[];actualizado_at:string;}
+export interface PublicHistoryResult {count:number;page:number;page_size:number;results:PublicHistoryRow[];actualizado_at:string;acceso_hasta:string;}
 interface HistoryContext {csrf:string;acceso_hasta:string;}
 
 @Injectable({providedIn:'root'})

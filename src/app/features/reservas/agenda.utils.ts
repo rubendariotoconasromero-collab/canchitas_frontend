@@ -8,7 +8,7 @@ export function hasPendingPayment(reservation: Pick<Reservation, 'estado' | 'sal
 export function reservationActionLabel(action: string): string {
   const labels: Record<string, string> = {RETENER: 'Horario apartado', REPROGRAMAR: 'Reserva reprogramada',
     CONFIRMAR: 'Reserva confirmada', CANCELAR: 'Reserva cancelada', INICIAR: 'Servicio iniciado',
-    FINALIZAR: 'Servicio finalizado', EXPIRAR: 'Plazo de pago vencido'};
+    FINALIZAR: 'Servicio finalizado', REGULARIZAR: 'Reserva regularizada', EXPIRAR: 'Plazo de pago vencido'};
   return Object.hasOwn(labels, action) ? labels[action] : action;
 }
 

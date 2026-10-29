@@ -7,11 +7,10 @@ import { BrandingService } from '../../../core/services/branding.service';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
-import { CheckboxComponent } from '../../../shared/components/checkbox/checkbox.component';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, InputComponent, ButtonComponent, BadgeComponent, CheckboxComponent],
+  imports: [ReactiveFormsModule, InputComponent, ButtonComponent, BadgeComponent],
   template: `
     <div class="login-card-master">
       <!-- Identidad del negocio -->
@@ -135,7 +134,6 @@ import { CheckboxComponent } from '../../../shared/components/checkbox/checkbox.
           </div>
 
           <div class="auth-form-options">
-            <app-checkbox label="Recordar sesión" [checked]="true" [disabled]="true" />
             <span class="auth-help-link" title="Consulta con el administrador en caso de problemas con tu cuenta">
               <span class="material-symbols-outlined">help_outline</span>
               ¿Necesitas ayuda?
@@ -175,8 +173,8 @@ export class LoginComponent {
   readonly error = signal('');
 
   readonly form = this.fb.nonNullable.group({
-    correo: ['admin@gmail.com', [Validators.required, Validators.email]],
-    password: ['password', [Validators.required]],
+    correo: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required]],
   });
 
   submit(): void {

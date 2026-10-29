@@ -126,11 +126,20 @@ import { SnackbarService } from '../../core/services/snackbar.service';
         @if(r.estado==='PENDIENTE' && auth.can('reservas.reprogramar')) { <app-button variant="outline-secondary" icon="schedule" (clicked)="openMove(r)">Reprogramar</app-button> }
         @if((r.estado==='PENDIENTE'||r.estado==='CONFIRMADA') && auth.can('reservas.cancelar')) { <app-button variant="outline-danger" icon="cancel" (clicked)="askCancel(r)">Cancelar reserva</app-button> }
         @if(r.estado==='PENDIENTE' && r.total===r.total_pagado && auth.can('reservas.confirmar')) { <app-button icon="check_circle" (clicked)="change(r,'confirmar')">Confirmar</app-button> }
-        @if(r.estado==='CONFIRMADA' && auth.can('reservas.iniciar')) { <app-button icon="sports_soccer" (clicked)="change(r,'iniciar')">Iniciar servicio</app-button> }
+        @if(r.estado==='CONFIRMADA' && DateNow()<timestamp(r.detalle.fin) && auth.can('reservas.iniciar')) { <app-button icon="sports_soccer" (clicked)="change(r,'iniciar')">Iniciar servicio</app-button> }
+        @if(r.estado==='CONFIRMADA' && DateNow()>=timestamp(r.detalle.fin) && auth.can('reservas.finalizar')) { <app-button icon="edit" (clicked)="openRegularization(r)">Regularizar reserva</app-button> }
         @if(r.estado==='EN_CURSO' && auth.can('reservas.finalizar')) { <app-button icon="check_circle" (clicked)="change(r,'finalizar')">Finalizar servicio</app-button> }
       </div>
-      <h3 class="h6 mb-0">Historial</h3><ul class="history-list">@for(h of r.historial;track $index) { <li>{{actionLabel(h.accion)}}<small>{{format(h.created_at)}} · {{h.actor_nombre || 'Sistema'}}</small></li> }</ul>
+      <h3 class="h6 mb-0">Historial</h3><ul class="history-list">@for(h of r.historial;track $index) { <li>{{actionLabel(h.accion)}}<small>{{format(h.created_at)}} · {{h.actor_nombre || 'Sistema'}}</small>@if(h.accion==='REGULARIZAR'){<small>{{stateLabel(''+h.datos['resultado'])}} · {{h.datos['motivo']}}</small>}</li> }</ul>
     </div> }
+  </app-modal>
+  <app-modal [open]="!!regularization()" title="Regularizar reserva" icon="edit" [busy]="saving()" (closed)="closeRegularization()">
+    <div class="modal-body operation-form">
+      <app-form-error [message]="formError()" [active]="!!regularization()" />
+      <app-select label="Resultado" [options]="regularizationOptions" [(ngModel)]="regularizationResult" />
+      <app-input label="Motivo" [(ngModel)]="regularizationReason" [required]="true" />
+    </div>
+    <div class="modal-footer"><app-button variant="outline-secondary" (clicked)="closeRegularization()">Volver</app-button><app-button [disabled]="!regularizationResult || !regularizationReason.trim()" [loading]="saving()" (clicked)="saveRegularization()">Guardar</app-button></div>
   </app-modal>
   <app-payment-modal [reservation]="paymentTarget()" (closed)="paymentTarget.set(null)" (paid)="reservationPaid()" />
   <app-modal [open]="!!confirmation()" title="Confirmar operacion" icon="warning" [busy]="saving()" (closed)="confirmation.set(null)">
@@ -169,19 +178,22 @@ export class AgendaComponent {
     // Keep interval keys stable until a new agenda response is received.
     const now=this.availabilityAt();
     for(const court of new Set(data.horarios.map(x=>x.cancha))){
-      const occupied=[...data.bloqueos.filter(x=>x.cancha===court),...data.reservas.filter(x=>x.detalle.cancha===court&&(['CONFIRMADA','EN_CURSO','FINALIZADA'].includes(x.estado)||(x.estado==='PENDIENTE'&&Date.parse(x.retencion_hasta)>now))).map(x=>x.detalle)];
+      const occupied=[...data.bloqueos.filter(x=>x.cancha===court),...data.reservas.filter(x=>x.detalle.cancha===court&&(['CONFIRMADA','EN_CURSO','FINALIZADA','NO_ASISTIO'].includes(x.estado)||(x.estado==='PENDIENTE'&&Date.parse(x.retencion_hasta)>now))).map(x=>x.detalle)];
       slots.set(court,freeIntervals(data.horarios.filter(x=>x.cancha===court),occupied,now));
     }
     return slots;
   });
   readonly mode=signal<''|'reserve'|'block'|'move'>(''); readonly saving=signal(false); readonly quoting=signal(false); readonly formError=signal(''); readonly quotation=signal<Quote|null>(null);
   readonly detail=signal<Reservation|null>(null); readonly confirmation=signal<{kind:'cancel'|'release';id:number}|null>(null);
+  readonly regularization=signal<number|null>(null);
+  readonly regularizationOptions=[{value:'FINALIZADA',label:'Servicio realizado'},{value:'NO_ASISTIO',label:'Cliente no asistio'}];
+  regularizationResult=''; regularizationReason='';
   readonly clientEditorOpen = signal(false);
   branches:Branch[]=[]; courts:CourtOption[]=[]; links:CourtLink[]=[]; clients:Cliente[]=[];
   branch=''; court=''; day=localDate(new Date(),'America/La_Paz'); days=1; state=''; reason=''; draft:any={}; moving?:number;
   calendarMode=false; calendarView:CalendarView='day';
   private sequence=0; private quoteSequence=0;
-  readonly stateOptions=['PENDIENTE','CONFIRMADA','EN_CURSO','FINALIZADA','CANCELADA','EXPIRADA'].map(value=>({value,label:this.stateLabel(value)}));
+  readonly stateOptions=['PENDIENTE','CONFIRMADA','EN_CURSO','FINALIZADA','NO_ASISTIO','CANCELADA','EXPIRADA'].map(value=>({value,label:this.stateLabel(value)}));
   get branchOptions(){return this.branches.map(x=>({value:String(x.id),label:x.nombre}));}
   get courtOptions(){return this.courts.filter(x=>String(x.sucursal)===this.branch).map(x=>({value:String(x.id),label:x.nombre+(x.activa?'':' (inactiva)')}));}
   get selectedBranchName(){return this.branches.find(x=>String(x.id)===this.branch)?.nombre??'';}
@@ -209,7 +221,7 @@ export class AgendaComponent {
       });
     },error:e=>this.error.set(apiError(e))});
   }
-  stateLabel(state:string){return ({PENDIENTE:'Pendiente de pago',CONFIRMADA:'Confirmada',EN_CURSO:'En curso',FINALIZADA:'Finalizada',CANCELADA:'Cancelada',EXPIRADA:'Plazo de pago vencido'} as Record<string,string>)[state]||state;}
+  stateLabel(state:string){return ({PENDIENTE:'Pendiente de pago',CONFIRMADA:'Confirmada',EN_CURSO:'En curso',FINALIZADA:'Finalizada',NO_ASISTIO:'Cliente no asistio',CANCELADA:'Cancelada',EXPIRADA:'Plazo de pago vencido'} as Record<string,string>)[state]||state;}
   get periodLabel(){
     if(!this.day)return 'Seleccionar fecha';
     const label=(day:string)=>new Intl.DateTimeFormat('es-BO',{timeZone:'UTC',day:'numeric',month:'long',year:'numeric'}).format(new Date(day+'T12:00:00Z'));
@@ -289,6 +301,9 @@ export class AgendaComponent {
   }
   openMove(r:Reservation){this.moving=r.id;this.detail.set(null);this.formError.set('');this.invalidateQuote();const time=(value:string)=>new Intl.DateTimeFormat('en-GB',{timeZone:r.detalle.zona_horaria,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(value));const date=localDate(new Date(r.detalle.inicio),r.detalle.zona_horaria);this.draft={fecha:date,hora_inicio:time(r.detalle.inicio),hora_fin:time(r.detalle.fin),cruza_medianoche:date!==localDate(new Date(r.detalle.fin),r.detalle.zona_horaria),alquiler_inmediato:false,notas:''};this.mode.set('move');}
   askCancel(r:Reservation){this.detail.set(null);this.reason='';this.formError.set('');this.confirmation.set({kind:'cancel',id:r.id});}
+  openRegularization(r:Reservation){this.detail.set(null);this.regularizationResult='';this.regularizationReason='';this.formError.set('');this.regularization.set(r.id);}
+  closeRegularization(){if(!this.saving())this.regularization.set(null);}
+  saveRegularization(){const id=this.regularization();if(!id||!this.regularizationResult||!this.regularizationReason.trim()||this.saving())return;this.saving.set(true);this.formError.set('');this.api.change(id,'regularizar',{resultado:this.regularizationResult,motivo:this.regularizationReason.trim()}).subscribe({next:()=>{this.saving.set(false);this.regularization.set(null);this.snackbar.success('Reserva regularizada correctamente.');this.load();},error:e=>{this.saving.set(false);this.formError.set(apiError(e));}});}
   askRelease(b:Block){this.formError.set('');this.confirmation.set({kind:'release',id:b.id});}
   confirm(){const action=this.confirmation();if(!action)return;this.saving.set(true);const request:Observable<unknown>=action.kind==='cancel'?this.api.change(action.id,'cancelar',{motivo:this.reason}):this.api.release(action.id);request.subscribe({next:()=>{this.snackbar.success(action.kind==='cancel' ? 'Reserva cancelada correctamente. No se realizan reembolsos.' : 'Bloqueo liberado correctamente.');this.saving.set(false);this.confirmation.set(null);this.load();},error:e=>{this.saving.set(false);this.formError.set(apiError(e));}});}
   change(r:Reservation,action:string){this.message.set('');this.detail.set(null);this.api.change(r.id,action).subscribe({next:()=>{this.snackbar.success(action==='iniciar' ? 'Servicio iniciado correctamente.' : action==='finalizar' ? 'Servicio finalizado correctamente.' : 'Reserva confirmada correctamente.');this.load();},error:e=>this.message.set(apiError(e))});}

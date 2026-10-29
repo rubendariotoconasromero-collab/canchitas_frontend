@@ -39,6 +39,11 @@ describe('LoginComponent', () => {
     expect(el.querySelector('button[type="submit"]')?.textContent).toContain('Ingresar');
   });
 
+  it('starts without preset credentials', () => {
+    const component = TestBed.createComponent(LoginComponent).componentInstance;
+    expect(component.form.value).toEqual({ correo: '', password: '' });
+  });
+
   it('submits valid credentials and navigates to dashboard', () => {
     const fixture = TestBed.createComponent(LoginComponent);
     const component = fixture.componentInstance;
