@@ -1,69 +1,49 @@
 # Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.8.
+## Instalacion en otro equipo
 
-## Development server
+Este repositorio necesita el [backend de Soccer Real Madrid](https://github.com/rubendariotoconasromero-collab/canchitas_backend).
+Clona ambos repositorios en carpetas `frontend` y `backend` y utiliza versiones
+publicadas de la misma entrega. La guia completa de Windows y MySQL esta en el
+`README.md` del backend.
 
-To start a local development server, run:
+El archivo `compatibilidad.json` identifica la entrega `srm-2026-10-instalacion-1`.
+Debe coincidir con el archivo del backend; la comprobacion lo compara cuando
+ambas carpetas estan una al lado de la otra.
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-The Django API must be running at `http://127.0.0.1:8000`. Requests to `/api/**`
-are forwarded there by `proxy.conf.json`. Restart `ng serve` after changing this
-configuration. A production static server needs its own `/api` reverse proxy;
-the Angular development proxy is not included in the build output.
-
-The configured local address is `http://localhost:4200/login`. Avoid starting a
-second server with `--host 127.0.0.1` on the same port: Windows can run separate
-IPv4 and IPv6 listeners, so localhost may reach an older Angular process. Stop
-the old `ng serve` terminal and run `npm start` again after a proxy change.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Instala Node 20.19+ de la rama 20, Node 22.12+ de la rama 22 o Node 24+, y npm.
+Desde la carpeta `frontend` en PowerShell o Git Bash:
 
 ```bash
-ng generate component component-name
+node --version
+npm.cmd --version
+node scripts/check-install.mjs --runtime-only
+npm.cmd ci
+npm.cmd run check:install
+npm.cmd start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+La primera comprobacion revisa Node y `npm.cmd ci` instala las dependencias. Mantener
+Django ejecutandose en `127.0.0.1:8000`: el proxy de desarrollo
+redirige `/api` y `/media` a ese backend. Si el puerto 4200 esta ocupado, detener
+el proceso anterior o escoger otro puerto y configurar los origenes autorizados.
+La web esta en `http://localhost:4200/` y el panel en `/login`.
 
-```bash
-ng generate --help
-```
+Una base nueva deja el negocio y las canchas sin publicar; las imagenes requieren
+registros en la base y configuracion de contenido. Para produccion se necesita un
+servidor HTTPS con proxy hacia `/api`, acceso a `/media` y fallback a `index.html`
+para las rutas de Angular. `ng serve` no es el servidor de produccion.
 
-## Building
+El backend genera credenciales iniciales al poblar una base nueva. No hay una
+contrasena fija; consulta el archivo privado generado durante esa carga.
 
-To build the project run:
+## Comprobaciones sin navegador
 
-```bash
-ng build
-```
+`npm.cmd run build` compila la aplicacion en `dist/`. Las comprobaciones
+`npm.cmd run test:public`, `npm.cmd run test:caja` y `npm.cmd run test:phase6`
+se ejecutan sin navegador. El comando `npm.cmd test` usa Karma y requiere un
+navegador, por lo que no forma parte de esas comprobaciones.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Si cambias `proxy.conf.json`, reinicia el servidor de desarrollo. En Windows,
+`localhost` puede resolver a IPv4 o IPv6: evita tener dos servidores en el mismo
+puerto y detiene el proceso anterior si se muestran cambios de otra copia.

@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "check:install": "node scripts/check-install.mjs",
     "prebuild": "npm run test:icons",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
