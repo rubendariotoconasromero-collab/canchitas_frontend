@@ -27,9 +27,24 @@ assert.deepEqual(ids('inexistente'),[]);
 assert.equal(options.length,4);
 const componentSource = readFileSync(new URL('../src/app/shared/components/search-select/search-select.component.ts',import.meta.url),'utf8');
 const componentCode = ts.transpileModule(componentSource,{compilerOptions:{module:ts.ModuleKind.CommonJS,experimentalDecorators:true}}).outputText;
-const state = value => {const read=()=>value;read.set=next=>value=next;return read;};
+let trackingEffect;
+const pendingEffects = new Set();
+const state = value => {
+  const subscribers=new Set();
+  const read=()=>{if(trackingEffect){subscribers.add(trackingEffect);trackingEffect.dependencies.add(subscribers);}return value;};
+  read.set=next=>{if(Object.is(next,value))return;value=next;for(const effect of subscribers)pendingEffects.add(effect);};
+  return read;
+};
+const flushEffects=()=>{
+  while(pendingEffects.size){
+    const effect=pendingEffects.values().next().value;pendingEffects.delete(effect);
+    for(const subscribers of effect.dependencies)subscribers.delete(effect);
+    effect.dependencies.clear();trackingEffect=effect;
+    try{effect.run();}finally{trackingEffect=undefined;}
+  }
+};
 const angular = {Component:()=>value=>value,ChangeDetectionStrategy:{OnPush:0},signal:state,input:state,computed:fn=>fn,
-  forwardRef:fn=>fn,viewChild:()=>()=>undefined,afterRenderEffect:()=>{}};
+  forwardRef:fn=>fn,viewChild:()=>state(undefined),afterRenderEffect:run=>pendingEffects.add({run,dependencies:new Set()})};
 const componentExports = {};
 vm.runInNewContext(componentCode,{exports:componentExports,require:name=>{
   if(name==='@angular/core')return angular;
@@ -63,4 +78,37 @@ assert.equal(select.value(),'3');
 select.setDisabledState(true);
 select.show();
 assert.equal(select.expanded(),false);
-console.log('Search select: 22 comprobaciones correctas, sin navegador (filtro y logica del control).');
+
+const pointerSelect = new componentExports.SearchSelectComponent();
+const clientOptions = [{value:'sin-cliente',label:'Sin cliente registrado'},...Array.from({length:24},(_,i)=>({value:String(i+10),label:`Cliente ${i+10}`}))];
+const list={scrollTop:0,children:[]};
+const scrolled=[];
+list.children=clientOptions.map((option,index)=>({scrollIntoView(){list.scrollTop=index*40;scrolled.push(option.value);}}));
+pointerSelect.options.set(clientOptions);pointerSelect.results.set({nativeElement:list});
+pointerSelect.field.set({nativeElement:{focus(){}}});
+let client='sin-cliente';pointerSelect.registerOnChange(value=>client=value);
+pointerSelect.writeValue(client);pointerSelect.show();flushEffects();
+assert.equal(scrolled.at(-1),'sin-cliente');
+list.scrollTop=600;
+const scrollCount=scrolled.length;
+pointerSelect.options.set(clientOptions.map(option=>({...option})));flushEffects();
+assert.equal(list.scrollTop,600,'Re-rendering equivalent options must not move a list while the user is clicking a customer');
+assert.equal(scrolled.length,scrollCount,'Options from a parent getter must not scroll back to Sin cliente registrado');
+pointerSelect.choose(clientOptions[16]);flushEffects();
+assert.equal(client,'25');assert.equal(pointerSelect.value(),'25');assert.equal(pointerSelect.expanded(),false);
+assert.equal(pointerSelect.selectedLabel(),'Cliente 25');
+pointerSelect.writeValue(client);pointerSelect.options.set(clientOptions.map(option=>({...option})));flushEffects();
+assert.equal(pointerSelect.value(),'25','ngModel writes and option refreshes must preserve the selected customer');
+pointerSelect.show();flushEffects();
+assert.equal(scrolled.at(-1),'25','Opening should scroll to the selected customer');
+pointerSelect.key({key:'ArrowDown',preventDefault(){}});flushEffects();
+assert.equal(scrolled.at(-1),'26','Keyboard navigation still scrolls the active option into view');
+pointerSelect.key({key:'Enter',preventDefault(){}});flushEffects();
+assert.equal(client,'26');assert.equal(pointerSelect.expanded(),false);
+pointerSelect.show();flushEffects();pointerSelect.search('Cliente 30');
+list.children=[{scrollIntoView(){list.scrollTop=0;scrolled.push('search-result');}}];flushEffects();
+assert.equal(scrolled.at(-1),'search-result','Changing the search query must still scroll to its first result');
+assert.equal(client,'','Typing must clear the old selection rather than silently choose Sin cliente registrado');
+pointerSelect.choose(clientOptions.find(option=>option.value==='30'));flushEffects();
+assert.equal(client,'30');assert.equal(pointerSelect.selectedLabel(),'Cliente 30');
+console.log('Search select: filtering, CVA values, mouse selection, stable manual scroll across option refreshes, search and keyboard navigation passed without browser.');

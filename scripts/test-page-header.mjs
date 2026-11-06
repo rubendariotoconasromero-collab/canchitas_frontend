@@ -65,7 +65,7 @@ function audit(node){
       const file=component?imports.get(component.getText(routeAst)):lazy.getText(routeAst).match(/import\('([^']+)'\)/)?.[1];
       assert.ok(file,`Cannot resolve route ${path.text}`);
       let content=readFileSync(new URL(file+'.ts',appBase),'utf8');
-      if(component?.getText(routeAst)==='CatalogPageComponent'){
+      if(file==='./features/catalogo/catalog-page.component'){
         assert.match(content,/<app-catalog-list/);
         content=readFileSync(new URL('features/catalogo/catalog-list.component.ts',appBase),'utf8');
       }
@@ -76,6 +76,29 @@ function audit(node){
   ts.forEachChild(node,audit);
 }
 audit(routeAst);assert.equal(audited.length,24,'Administrative, reports, audit, public history/detail/tracking and access-error screens must be audited');
+
+const routed=[];
+function collectRoutes(node){
+  if(ts.isObjectLiteralExpression(node)){
+    const props=new Map(node.properties.filter(ts.isPropertyAssignment).map(p=>[p.name.getText(routeAst).replace(/['"]/g,''),p.initializer]));
+    if(props.has('path')&&ts.isStringLiteral(props.get('path')))routed.push(props);
+  }
+  ts.forEachChild(node,collectRoutes);
+}
+collectRoutes(routeAst);
+const administrative=routed.find(props=>props.get('canActivateChild')?.getText(routeAst)==='[permissionGuard]');
+assert.ok(administrative,'Administrative routes must keep the permission guard');
+assert.equal(administrative.get('canActivate')?.getText(routeAst),'[authGuard]');
+assert.ok(administrative.has('loadComponent'),'Administrative layout must load on demand');
+const expected={negocio:['negocio.ver','negocios'],sucursales:['sucursales.ver','sucursales'],deportes:['deportes.ver','deportes'],canchas:['canchas.ver','canchas'],politicas:['politicas.ver','politicas'],dashboard:['dashboard.ver'],usuarios:['usuarios.ver'],roles:['roles.ver'],permisos:['permisos.ver']};
+for(const [path,[permission,catalog]] of Object.entries(expected)){
+  const route=routed.find(props=>props.get('path').text===path);
+  assert.ok(route?.has('loadComponent')&&!route.has('component'),`${path} must load on demand`);
+  assert.match(route.get('data').getText(routeAst),new RegExp(`permission:\\s*['"]${permission.replace('.', '\\.')}['"]`));
+  if(catalog)assert.match(route.get('data').getText(routeAst),new RegExp(`catalog:\\s*['"]${catalog}['"]`));
+}
+const noAccess=routed.find(props=>props.get('path').text==='sin-acceso');
+assert.ok(noAccess.has('loadComponent'));assert.equal(noAccess.get('canActivate').getText(routeAst),'[authGuard]');
 
 class Auth{}
 let permissions=[];

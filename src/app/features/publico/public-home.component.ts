@@ -1,31 +1,23 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, afterEveryRender, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RESERVAS_UI } from '../reservas/reservas-ui';
 import { PublicBusiness, PublicCourt, PublicService } from './public.service';
 import { apiError } from '../reservas/reservas.service';
 import { BrandingService } from '../../core/services/branding.service';
 import { PublicSliderComponent } from './public-slider.component';
 
-@Component({selector:'app-public-home',imports:[...RESERVAS_UI,PublicSliderComponent],styleUrls:['./public.css','./public-home.css'],template:`
+@Component({selector:'app-public-home',imports:[...RESERVAS_UI,PublicSliderComponent,RouterLink],styleUrls:['./public.css','./public-home.css'],template:`
   @if(business();as b){
-    <app-public-slider [brand]="b.nombre" [slides]="heroSlides()" [lema]="b.web?.lema || ''" [introduction]="b.web?.descripcion_intro || b.descripcion" />
-    @for(section of b.web?.secciones || [];track section.id){
-      <section class="institutional-band" [class.alternate]="section.tipo==='INSTALACIONES'">
-        <div class="public-width institutional-content" [class.with-image]="!!section.imagen">
-          <div><span class="section-kicker">{{section.tipo}}</span><h2>{{section.titulo}}</h2><p>{{section.contenido}}</p></div>
-          @if(section.imagen){<img [src]="section.imagen" [alt]="section.alt" loading="lazy" />}
-        </div>
-      </section>
-    }
-    @if(b.web?.mostrar_deportes && b.web?.deportes?.length){<section class="public-width public-section" id="deportes">
-      <span class="section-kicker">Elige tu juego</span><h2 class="band-heading">Deportes</h2>
-      <div class="sport-grid">@for(d of b.web?.deportes || [];track d.id){<article class="sport-item">
-        @if(d.imagen){<img [src]="d.imagen" [alt]="d.alt" loading="lazy" />}
-        <div><h3>{{d.nombre}}</h3>@if(d.descripcion){<p>{{d.descripcion}}</p>}
-        @if(b.web?.mostrar_canchas!==false){<app-button variant="outline-secondary" icon="arrow_forward" (clicked)="selectSport(d.nombre)">Ver canchas</app-button>}</div>
-      </article>}</div>
-    </section>}
+    <app-public-slider [brand]="b.nombre" [logo]="b.logo || 'escudo-real-madrid.png'" [showCourts]="b.web?.mostrar_canchas!==false" [showContact]="b.web?.mostrar_contacto!==false" [slides]="heroSlides()" [lema]="b.web?.lema || ''" [introduction]="b.web?.descripcion_intro || b.descripcion" />
+    <section class="public-access" aria-label="Accesos principales"><div class="public-width public-access-grid">
+      @if(b.web?.mostrar_canchas!==false){<a class="public-access-link" href="#canchas"><span class="public-access-icon material-symbols-outlined" aria-hidden="true">sports_soccer</span><span><strong>Canchas</strong><small>Conoce nuestros espacios</small></span></a>}
+      @if(b.web?.mostrar_deportes && b.web?.deportes?.length){<a class="public-access-link" href="#deportes"><span class="public-access-icon material-symbols-outlined" aria-hidden="true">event</span><span><strong>Deportes</strong><small>Elige tu deporte</small></span></a>}
+      <a class="public-access-link" routerLink="/mis-solicitudes"><span class="public-access-icon material-symbols-outlined" aria-hidden="true">fact_check</span><span><strong>Mis solicitudes</strong><small>Consulta tus solicitudes</small></span></a>
+      @if(b.web?.mostrar_contacto!==false){<a class="public-access-link" href="#contacto"><span class="public-access-icon material-symbols-outlined" aria-hidden="true">location_on</span><span><strong>Contacto</strong><small>Encuentranos</small></span></a>}
+    </div></section>
     @if(b.web?.mostrar_canchas!==false){
-    <section class="public-width public-section" id="canchas"><app-page-header title="Nuestras canchas" icon="sports_soccer" [showBack]="false" />
+    <section class="public-width public-section courts-section" id="canchas"><span class="section-kicker">El espacio para tu equipo</span><app-page-header title="Nuestras canchas" icon="sports_soccer" [showBack]="false" />
       <app-list-toolbar [query]="query()" (queryChange)="query.set($event)" searchLabel="Buscar cancha" [total]="visible().length" [showRefresh]="true" [loading]="loading()" (refreshed)="loadCourts()">
         <app-select toolbar-filter label="Sucursal" placeholder="Todas" [options]="branches" [ngModel]="branch()" (ngModelChange)="branch.set($event)" />
         <app-select toolbar-filter label="Deporte" placeholder="Todos" [options]="sports" [ngModel]="sport()" (ngModelChange)="sport.set($event)" />
@@ -38,6 +30,22 @@ import { PublicSliderComponent } from './public-slider.component';
           <div class="public-court-bottom"><span>@if(c.precio_desde){Desde <strong>Bs {{c.precio_desde}}/hora</strong>}</span><app-button-link [route]="'/espacios/'+c.id" icon="arrow_forward">Ver cancha</app-button-link></div></div>
       </article>}@empty{<p class="public-empty">No hay canchas disponibles para esta seleccion.</p>}</div>}
     </section>
+    }
+    @if(b.web?.mostrar_deportes && b.web?.deportes?.length){<section class="sports-band" id="deportes"><div class="public-width public-section">
+      <span class="section-kicker">Elige tu juego</span><h2 class="band-heading">Deportes</h2>
+      <div class="sport-grid">@for(d of b.web?.deportes || [];track d.id){<article class="sport-item">
+        @if(d.imagen){<img [src]="d.imagen" [alt]="d.alt" loading="lazy" />}
+        <div><h3>{{d.nombre}}</h3>@if(d.descripcion){<p>{{d.descripcion}}</p>}
+        @if(b.web?.mostrar_canchas!==false){<app-button variant="outline-secondary" icon="arrow_forward" (clicked)="selectSport(d.nombre)">Ver canchas</app-button>}</div>
+      </article>}</div>
+    </div></section>}
+    @for(section of b.web?.secciones || [];track section.id){
+      <section class="institutional-band" [class.alternate]="section.tipo==='INSTALACIONES'">
+        <div class="public-width institutional-content" [class.with-image]="!!section.imagen">
+          <div><span class="section-kicker">{{section.tipo}}</span><h2>{{section.titulo}}</h2><p>{{section.contenido}}</p></div>
+          @if(section.imagen){<img [src]="section.imagen" [alt]="section.alt" loading="lazy" />}
+        </div>
+      </section>
     }
     @if(b.web?.mostrar_contacto!==false){<section class="public-contact" id="contacto"><div class="public-width"><span class="section-kicker">Contacto y ubicacion</span><h2>Encuentranos</h2>
       @if(b.web?.horario_atencion){<p class="attention-hours"><span class="material-symbols-outlined" aria-hidden="true">schedule</span>{{b.web?.horario_atencion}}</p>}
@@ -55,16 +63,28 @@ export class PublicHomeComponent {
   readonly loading=signal(false);readonly error=signal('');readonly query=signal('');readonly branch=signal('');readonly sport=signal('');
   readonly visible=computed(()=>this.courts().filter(c=>(!this.branch()||String(c.sucursal.id)===this.branch())&&(!this.sport()||c.deportes.some(d=>d.nombre===this.sport()))&&c.nombre.toLowerCase().includes(this.query().trim().toLowerCase())));
   private sequence=0;
+  private pendingFragment:string|null=null;
   readonly heroSlides=computed(()=>{
     const b=this.business();if(b?.web?.slides.length)return b.web.slides;
     const photo=this.courts().flatMap(c=>c.fotos)[0];const url=b?.portada || photo?.url;
-    return url ? [{id:0,titulo:'Canchas para tu equipo',descripcion:b?.descripcion || '',imagen:url,alt:photo?.descripcion || b?.nombre || '',texto_boton:'Ver canchas',destino:'CANCHAS' as const}] : [];
+    return url ? [{id:0,titulo:'Canchas para tu equipo',descripcion:b?.descripcion || '',imagen:url,alt:b?.portada ? b.nombre : photo?.descripcion || b?.nombre || '',texto_boton:b?.web?.mostrar_canchas===false ? '' : 'Ver canchas',destino:'CANCHAS' as const}] : [];
   });
   selectSport(name:string){this.sport.set(name);document.getElementById('canchas')?.scrollIntoView({behavior:'smooth',block:'start'});}
   contactHref(kind:string,value:string){return kind==='CORREO' ? 'mailto:'+value : kind==='WHATSAPP' ? 'https://wa.me/'+value.replace(/\D/g,'') : 'tel:'+value;}
   get branches(){return this.business()?.sucursales.map(s=>({value:String(s.id),label:s.nombre}))||[];}
   get sports(){return [...new Set(this.courts().flatMap(c=>c.deportes.map(d=>d.nombre)))].map(name=>({value:name,label:name}));}
-  constructor(){this.load();}
+  constructor(){
+    inject(ActivatedRoute).fragment.pipe(takeUntilDestroyed(inject(DestroyRef))).subscribe(fragment=>{
+      this.pendingFragment=fragment && ['canchas','deportes','contacto'].includes(fragment) ? fragment : null;
+    });
+    afterEveryRender(()=>{
+      if(!this.pendingFragment || !this.business())return;
+      const target=document.getElementById(this.pendingFragment);
+      if(target){target.scrollIntoView({behavior:'smooth',block:'start'});this.pendingFragment=null;}
+      else if(!this.loading())this.pendingFragment=null;
+    });
+    this.load();
+  }
   load(){const sequence=++this.sequence;this.loading.set(true);this.error.set('');this.api.business().subscribe({next:b=>{if(sequence!==this.sequence)return;this.business.set(b);this.loadCourts();},error:e=>{if(sequence!==this.sequence)return;this.loading.set(false);this.business.set(null);this.error.set(e.status===404?'Pronto compartiremos nuestras canchas y horarios.':apiError(e));}});}
   loadCourts(){const sequence=++this.sequence;this.loading.set(true);this.error.set('');this.api.courts().subscribe({next:c=>{if(sequence!==this.sequence)return;this.courts.set(c);this.loading.set(false);},error:e=>{if(sequence!==this.sequence)return;this.error.set(apiError(e));this.loading.set(false);}});}
 }

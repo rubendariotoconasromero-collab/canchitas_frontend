@@ -81,7 +81,10 @@ export class SolicitudesComponent {
   readonly stateOptions=Object.entries(requestLabels).map(([value,label])=>({value,label}));
   readonly filtered=computed(()=>{const q=this.query().trim().toLowerCase();return this.rows().filter(r=>(!this.branch() || String(r.sucursal)===this.branch()) && (!this.state() || r.estado===this.state()) && `${r.codigo_correlativo || ''} ${r.codigo} ${r.nombre} ${r.telefono} ${r.cancha}`.toLowerCase().includes(q));});
   get branchOptions(){return this.branches.map(b=>({value:String(b.id),label:b.nombre}));}
-  get clientOptions(){return [...(this.auth.can('clientes.crear')?[{value:'new',label:'Registrar cliente con los datos de la solicitud'}]:[]),...this.clients.map(c=>({value:String(c.id),label:`${c.nombre} · ${c.telefono}`}))];}
+  get clientOptions(){const row=this.selected();return [
+    ...(row?.cliente && row.cliente_activo?[{value:'linked',label:`Cliente registrado desde la web: ${row.nombre}`}]:[]),
+    ...(!row?.cliente && this.auth.can('clientes.crear')?[{value:'new',label:'Registrar cliente con los datos de la solicitud'}]:[]),
+    ...this.clients.filter(c=>c.activo && c.id!==row?.cliente).map(c=>({value:String(c.id),label:`${c.nombre} · ${c.telefono}`}))];}
   private readonly route=inject(ActivatedRoute);private navigationSubscription?:Subscription;private noticeVersion=0;
   ngOnDestroy(){this.navigationSubscription?.unsubscribe();this.noticeVersion++;this.loadVersion++;this.detailVersion++;}
   constructor(){this.api.branches().subscribe({next:b=>{this.branches=b;this.navigationSubscription=this.route.queryParamMap.subscribe(params=>{
@@ -91,13 +94,13 @@ export class SolicitudesComponent {
   });},error:e=>this.loadError.set(apiError(e))});this.load();}
   date(value:string,zone:string){return new Intl.DateTimeFormat('es-BO',{timeZone:zone,dateStyle:'short',timeStyle:'short',hour12:false}).format(new Date(value));}
   load(){const version=++this.loadVersion;this.loading.set(true);this.loadError.set('');this.api.list().subscribe({next:rows=>{if(version!==this.loadVersion)return;this.rows.set(rows);this.loading.set(false);},error:e=>{if(version!==this.loadVersion)return;this.loading.set(false);this.loadError.set(apiError(e));}});}
-  open(row:Solicitud){if(this.busy())return;const version=++this.detailVersion;this.selected.set(row);this.quotation.set(null);this.quoting.set(false);this.error.set('');this.reason='';this.clients=[];this.client=this.auth.can('clientes.crear')?'new':'';
+  open(row:Solicitud){if(this.busy())return;const version=++this.detailVersion;this.selected.set(row);this.quotation.set(null);this.quoting.set(false);this.error.set('');this.reason='';this.clients=[];this.client=row.cliente && row.cliente_activo?'linked':!row.cliente && this.auth.can('clientes.crear')?'new':'';
     if(this.auth.can('clientes.ver'))this.clientsApi.clients(String(row.sucursal)).subscribe({next:rows=>{if(version===this.detailVersion)this.clients=rows;},error:e=>{if(version===this.detailVersion)this.error.set(apiError(e));}});
   }
   close(){if(this.busy())return;this.detailVersion++;this.selected.set(null);this.quotation.set(null);this.quoting.set(false);}
   cotizar(){const row=this.selected();if(!row||this.busy()||this.quoting()||!this.auth.can('solicitudes.aceptar'))return;const version=this.detailVersion;this.quoting.set(true);this.quotation.set(null);this.error.set('');this.api.quote(row.id).subscribe({next:q=>{if(version!==this.detailVersion)return;this.quotation.set(q);this.quoting.set(false);},error:e=>{if(version!==this.detailVersion)return;this.quoting.set(false);this.error.set(apiError(e));}});}
   accept(){const row=this.selected(),q=this.quotation();if(!row||!q||!this.client||this.busy()||this.quoting()||!this.auth.can('solicitudes.aceptar'))return;this.busy.set(true);this.error.set('');
-    this.api.accept(row.id,q,this.client==='new'?'':this.client).subscribe({next:r=>{this.busy.set(false);this.close();this.reservation.set(r.reserva);this.snackbar.success('Solicitud aceptada. La reserva queda pendiente del pago total.');this.load();},error:e=>{this.busy.set(false);this.quotation.set(null);this.error.set(apiError(e));}});
+    this.api.accept(row.id,q,this.client==='new'||this.client==='linked'?'':this.client).subscribe({next:r=>{this.busy.set(false);this.close();this.reservation.set(r.reserva);this.snackbar.success('Solicitud aceptada. La reserva queda pendiente del pago total.');this.load();},error:e=>{this.busy.set(false);this.quotation.set(null);this.error.set(apiError(e));}});
   }
   reject(){const row=this.selected();if(!row||!this.reason.trim()||this.reason.trim().length>255||this.busy()||this.quoting()||!this.auth.can('solicitudes.rechazar'))return;this.busy.set(true);this.error.set('');this.api.reject(row.id,this.reason.trim()).subscribe({next:()=>{this.busy.set(false);this.close();this.snackbar.success('Solicitud rechazada.');this.load();},error:e=>{this.busy.set(false);this.error.set(apiError(e));}});}
   viewReservation(id:number){if(this.busy())return;this.busy.set(true);this.error.set('');this.api.reservation(id).subscribe({next:r=>{this.busy.set(false);this.close();this.reservation.set(r);},error:e=>{this.busy.set(false);this.error.set(apiError(e));}});}

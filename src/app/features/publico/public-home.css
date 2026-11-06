@@ -1,22 +1,43 @@
-.institutional-band { padding:3rem 0; border-bottom:1px solid #dce0d5; }
-.institutional-band.alternate { background:#f3f4f0; }
+.public-access { background:#fff; border-bottom:1px solid #e2e9f2; }
+.public-access-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); padding-block:1.6rem; }
+.public-access-link { min-width:0; min-height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.65rem; padding:.5rem 1rem; text-align:center; color:#0b3976; text-decoration:none; border-right:1px solid #e3e9f0; }
+.public-access-link:last-child { border-right:0; }
+.public-access-link:hover strong { text-decoration:underline; }
+.public-access-link:focus-visible { outline:3px solid #bb8500; outline-offset:2px; }
+.public-access-link>span:last-child { display:grid; gap:.2rem; }
+.public-access-link strong { font-size:15px; overflow-wrap:anywhere; }
+.public-access-link small { color:#5b6f84; font-size:12px; line-height:1.4; overflow-wrap:anywhere; }
+.public-access-icon { width:54px; height:54px; display:grid; place-items:center; border-radius:50%; background:#eaf2fb; color:#14539a; font-size:25px; }
+.courts-section { padding-block:3.5rem 4rem; }
+.sports-band { background:#f3f7fc; border-block:1px solid #e2e9f2; }
+.sports-band .public-section { padding-block:3.5rem; }
+.institutional-band { padding:3.5rem 0; border-bottom:1px solid #e2e9f2; }
+.institutional-band.alternate { background:#f7f9fc; }
 .institutional-content { display:grid; gap:2rem; align-items:center; }
 .institutional-content.with-image { grid-template-columns:1fr 1fr; }
-.institutional-content h2,.band-heading { font-size:28px; margin:.6rem 0 1.5rem; color:#171717; }
+.institutional-content h2,.band-heading { font-size:28px; margin:.6rem 0 1.5rem; color:#0b3976; }
 .institutional-content p { white-space:pre-line; line-height:1.75; font-size:15px; margin:0; overflow-wrap:anywhere; }
-.institutional-content img { width:100%; aspect-ratio:4/3; object-fit:cover; }
-.section-kicker { text-transform:uppercase; font-size:11px; font-weight:700; color:#647100; }
+.institutional-content img { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:6px; }
+.section-kicker { text-transform:uppercase; font-size:11px; font-weight:700; color:#a26b00; }
 .sport-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.5rem; }
-.sport-item { border:1px solid #dce0d5; border-radius:6px; overflow:hidden; background:#fff; }
+.sport-item { border:1px solid #dce5ef; border-radius:6px; overflow:hidden; background:#fff; }
 .sport-item>img { width:100%; aspect-ratio:4/3; object-fit:cover; }
 .sport-item>div { padding:1.25rem; }
-.sport-item h3 { font-size:18px; }
+.sport-item h3 { font-size:18px; color:#0b3976; }
 .sport-item p { font-size:14px; line-height:1.6; overflow-wrap:anywhere; }
 .attention-hours { display:flex; gap:.5rem; align-items:center; font-size:14px; }
-.public-contact-links a,.social-links a { display:inline-flex; align-items:center; gap:.5rem; color:#171717; text-decoration:none; }
-.public-contact-links a { overflow-wrap:anywhere; max-width:100%; }
-.public-contact-links .material-symbols-outlined { color:#647100; font-size:18px; }
-.social-links { display:flex; flex-wrap:wrap; gap:1.5rem; margin-top:2rem; border-top:1px solid #dce0d5; padding-top:1rem; font-size:13px; }
+.public-contact-links a,.social-links a { display:inline-flex; align-items:center; gap:.5rem; color:#123e75; text-decoration:none; }
+.public-contact-links a,.social-links a { min-width:0; max-width:100%; overflow-wrap:anywhere; }
+.public-contact-links a>span:not(.material-symbols-outlined),.social-links a>span:not(.material-symbols-outlined) { min-width:0; overflow-wrap:anywhere; }
+.public-contact-links .material-symbols-outlined { color:#a26b00; font-size:18px; }
+.social-links { display:flex; flex-wrap:wrap; gap:1.5rem; margin-top:2rem; border-top:1px solid #dce5ef; padding-top:1rem; font-size:13px; }
 .social-links .material-symbols-outlined { font-size:16px; }
-@media(max-width:760px) { .institutional-content.with-image { grid-template-columns:1fr; } .sport-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .institutional-band { padding-block:2rem; } }
+@media(max-width:760px) {
+  .public-access-grid { grid-template-columns:repeat(2,minmax(0,1fr)); padding-block:1rem; }
+  .public-access-link { min-height:112px; padding:.5rem; }
+  .public-access-link:nth-child(even) { border-right:0; }
+  .institutional-content.with-image { grid-template-columns:1fr; }
+  .sport-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .institutional-band,.sports-band .public-section,.courts-section { padding-block:2.5rem; }
+}
 @media(max-width:480px) { .sport-grid { grid-template-columns:1fr; } }

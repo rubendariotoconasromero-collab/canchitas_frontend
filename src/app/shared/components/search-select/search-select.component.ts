@@ -59,7 +59,8 @@ export class SearchSelectComponent implements ControlValueAccessor {
 
   constructor() {
     afterRenderEffect(() => {
-      this.filtered();
+      // Parent getters recreate options during clicks; only user navigation should scroll.
+      this.query();
       const option = this.results()?.nativeElement.children[this.active()] as HTMLElement | undefined;
       if(this.expanded()) option?.scrollIntoView({block: 'nearest'});
     });

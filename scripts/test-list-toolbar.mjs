@@ -76,9 +76,10 @@ assert.equal(focused, true);
 load('shared/components/filter-context/filter-context.component.ts');
 
 const calls = [];
+let clientRows = [];
 const api = {
   branches: () => ({subscribe: observer => observer.next([{id: 1, nombre: 'Central'}])}),
-  clients: (branch, query) => { calls.push([branch, query]); return {subscribe: observer => observer.next([])}; },
+  clients: (branch, query) => { calls.push([branch, query]); return {subscribe: observer => observer.next(clientRows)}; },
 };
 class ReservasService {}
 class ActivatedRoute {}
@@ -96,6 +97,18 @@ vm.runInNewContext(queryEvent.handler.source, {set search(value) {client.search 
 assert.deepEqual(calls.at(-1), ['1', 'Juan'], 'Search text must be updated before loading clients');
 client.search = ''; client.branch = '2'; client.load();
 assert.deepEqual(calls.at(-1), ['2', ''], 'Clearing search and changing branch must update API arguments');
+client.branch = '1';
+clientRows = [{id: 17, sucursal: 1, nombre: 'Maria Fernandez', telefono: '70123456', correo: 'maria@example.test', documento: '', activo: true}];
+const clientRefreshEvent = elements(parseTemplate(clients.metadata.template, 'clients').nodes, 'app-list-toolbar')[0]
+  .outputs.find(output => output.name === 'refreshed');
+vm.runInNewContext(clientRefreshEvent.handler.source, {load: () => client.load()});
+assert.equal(client.rows().length, 1, 'Refreshing the client module must load newly registered public contacts');
+assert.equal(client.rows()[0].id, 17);
+assert.match(clients.metadata.template, /row\.nombre/);
+assert.match(clients.metadata.template, /row\.telefono/);
+assert.match(clients.metadata.template, /row\.correo/);
+vm.runInNewContext(clientRefreshEvent.handler.source, {load: () => client.load()});
+assert.equal(client.rows().length, 1, 'A refresh must replace the list rather than append duplicate rows');
 
 for (const [path, Class, state, filtered, rows, term] of [
   ['usuarios/usuarios', 'UsuariosComponent', 'usuarios', 'filteredUsuarios',

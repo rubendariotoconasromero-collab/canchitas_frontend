@@ -20,7 +20,7 @@ class Route {}
 class Router {}
 
 function setup(query = {}, allowed = true) {
-  const writes = [], reads = [];
+  const writes = [], reads = [], quotations = [];
   const navigations = [];
   let reject = true;
   const response = data => ({subscribe(observer) {observer.next?.(data);}});
@@ -39,6 +39,7 @@ function setup(query = {}, allowed = true) {
     ], canchas_deportes: []}),
     agenda: filters => {reads.push(filters);return {subscribe() {}};},
     clients: () => response([]),
+    quote: data => {quotations.push(data);return response({total:'100.00',minutos:60,retencion_minutos:15,desglose:[]});},
     quoteMove: () => response({total: '200.00'}),
     change: (id, action, data) => write(action, data),
     reserve: data => write('reserve', data),
@@ -64,7 +65,7 @@ function setup(query = {}, allowed = true) {
     if (!(name in mocks)) throw Error(`Unexpected dependency: ${name}`);
     return mocks[name];
   }});
-  return {component: new exports.AgendaComponent(), writes, reads, navigations, accept: () => reject = false};
+  return {component: new exports.AgendaComponent(), writes, reads, quotations, navigations, accept: () => reject = false};
 }
 
 const operational = setup().component;
@@ -103,6 +104,22 @@ reservation.component.save();
 assert.equal(reservation.component.quotation(), null);
 assert.equal(reservation.component.draft.notas, 'Conservar');
 assert.equal(reservation.writes[0].data.sin_cliente, true);
+
+const identified = setup();
+identified.component.clients=[{id:17,sucursal:1,nombre:'Maria Prueba',telefono:'70000001',correo:'',documento:'',activo:true}];
+identified.component.openForm('reserve');
+const chosenClient=identified.component.clientOptions.find(option=>option.value==='17');
+assert.ok(chosenClient,'An active branch customer must be present in the live search');
+identified.component.draft.cliente=chosenClient.value;
+identified.component.draft.cancha_deporte='3';
+identified.component.invalidateQuote();
+identified.component.calculate();
+assert.equal(identified.quotations[0].cliente,17,'Quoting must send the chosen customer ID');
+assert.equal('sin_cliente' in identified.quotations[0],false);
+assert.equal(identified.component.draft.cliente,'17','The quotation must not revert the selected customer');
+identified.accept();identified.component.save();
+assert.equal(identified.writes[0].data.cliente,17,'Saving must send the same selected customer');
+assert.equal('sin_cliente' in identified.writes[0].data,false,'An identified booking must never be submitted as Sin cliente registrado');
 
 const maintenance = setup();
 maintenance.component.mode.set('block');

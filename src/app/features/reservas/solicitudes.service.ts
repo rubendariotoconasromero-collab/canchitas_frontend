@@ -7,6 +7,7 @@ import { PublicQuote } from '../publico/public.service';
 export interface Solicitud {
   id:number;codigo:string;codigo_correlativo?:string;sucursal:number;cancha:string;deporte:string;zona_horaria:string;inicio:string;fin:string;
   nombre:string;telefono:string;correo:string;notas:string;total_cotizado:string;estado:string;condiciones_snapshot:{condiciones?:string;horas_cancelacion?:number;politica_version?:number};
+  cliente?:number|null;cliente_activo?:boolean|null;
   reserva:number|null;estado_reserva:string|null;revisado_at:string|null;motivo:string;created_at:string;
 }
 @Injectable({providedIn:'root'})
